@@ -18,6 +18,7 @@ gradlePlugin {
             implementationClass = "com.ttypic.swiftklib.gradle.SwiftKlibPlugin"
         }
     }
+
 }
 
 repositories {
