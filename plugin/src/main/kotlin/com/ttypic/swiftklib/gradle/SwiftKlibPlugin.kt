@@ -30,7 +30,14 @@ class SwiftKlibPlugin : Plugin<Project> {
             }
 
             targetToTaskName.entries.forEach { (target, taskName) ->
-                tasks.register(taskName, CompileSwift::class.java, name, target)
+                tasks.register(
+                    taskName,
+                    CompileSwift::class.java,
+                    name,
+                    target,
+                    entry.path,
+                    entry.packageNameProperty.get(),
+                )
             }
 
             libNameToTargetToTaskName.set(name, targetToTaskName)

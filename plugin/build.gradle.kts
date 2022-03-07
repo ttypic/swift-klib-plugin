@@ -1,6 +1,6 @@
 plugins {
     id("java-gradle-plugin")
-    kotlin("jvm")
+    kotlin("jvm") version "1.7.22"
 }
 
 dependencies {
