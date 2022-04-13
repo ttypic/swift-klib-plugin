@@ -19,9 +19,6 @@ class SwiftKlibPlugin : Plugin<Project> {
 
         project.extensions.add("swiftklib", swiftKlibEntries)
 
-        val libNameToTargetToTaskName: MutableMap<String, Map<CompileTarget, String>> =
-            mutableMapOf()
-
         swiftKlibEntries.all { entry ->
             val name: String = entry.name
 
@@ -39,16 +36,17 @@ class SwiftKlibPlugin : Plugin<Project> {
                     entry.packageNameProperty.get(),
                 )
             }
-
-            libNameToTargetToTaskName.set(name, targetToTaskName)
         }
 
         tasks.withType(CInteropProcess::class.java).configureEach { cinterop ->
-            if (!libNameToTargetToTaskName.contains(cinterop.interopName)) return@configureEach
             val cinteropTarget = CompileTarget.byKonanName(cinterop.konanTarget.name)
                 ?: return@configureEach
-            val taskName = libNameToTargetToTaskName[cinterop.interopName]!![cinteropTarget]!!
-            cinterop.dependsOn(taskName)
+            val taskName =
+                "swiftklib${cinterop.interopName.capitalized()}${cinteropTarget.name.capitalized()}"
+            val task = (tasks.findByName(taskName) as CompileSwift?) ?: return@configureEach
+
+            cinterop.settings.defFile = task.defFile
+            cinterop.dependsOn(task)
         }
     }
 }
