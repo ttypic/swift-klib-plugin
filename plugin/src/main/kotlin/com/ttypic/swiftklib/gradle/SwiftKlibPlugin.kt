@@ -32,8 +32,9 @@ class SwiftKlibPlugin : Plugin<Project> {
                     CompileSwift::class.java,
                     name,
                     target,
-                    entry.path,
-                    entry.packageNameProperty.get(),
+                    entry.pathProperty,
+                    entry.packageNameProperty,
+                    entry.minIosProperty
                 )
             }
         }
