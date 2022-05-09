@@ -17,11 +17,7 @@ abstract class SwiftKlibEntry @Inject constructor(val name: String) {
             pathProperty.set(value)
         }
 
-    var packageName: String
-        get() = packageNameProperty.get()
-        set(value) {
-            packageNameProperty.set(value)
-        }
+    fun packageName(name: String) = packageNameProperty.set(name)
 
     var minIos: Int
         get() = minIosProperty.get()
