@@ -15,7 +15,7 @@ open class CompileSwift @Inject constructor(
     @Input val compileTarget: CompileTarget,
     @Input val pathProperty: Property<File>,
     @Input val packageNameProperty: Property<String>,
-    @Input val minIosProperty: Property<Int>,
+    @Optional @Input val minIosProperty: Property<Int>,
 ) : DefaultTask() {
 
     @get:Internal
@@ -105,7 +105,6 @@ open class CompileSwift @Inject constructor(
                 "-Xswiftc",
                 "${compileTarget.arch()}-apple-ios${minIos}.0${compileTarget.simulatorSuffix()}",
             )
-            println(it.args.joinToString(separator = " "))
         }
 
         return SwiftBuildResult(
