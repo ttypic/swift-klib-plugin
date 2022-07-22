@@ -1,14 +1,23 @@
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="docs/media/swiftklib-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="docs/media/swiftklib-dark.svg">
-  <img src="docs/media/swiftklib-light.svg" width="300">
+  <img src="docs/media/logo/titled-1.png" width="300">
 </picture>
 
 <br/>
-<br/>
 
----
+# Swift Klib Gradle Plugin
 
-Swift Klib Gradle Plugin is an experimental project for using Swift code in Kotlin Multiplatform Mobile shared library
+This gradle plugin is aimed to provide easy way to generate Kotlin binding for
+Swift-only API __(e.g. CryptoKit)__ and use it later in **Kotlin Multiplatform Mobile** shared library.
 
-The main goal is to provide easy way to generate kotlin binding for Swift-only API (e.g. CryptoKit)
+**Note:** __This plugin is still under development, it works quite well for my private projects. But
+it hasn't been tested in different environments and setups. If you like the idea of the project and
+have trouble with setup, don't hesitate and create issue or start a discussion. Any feedback is
+very much appreciated.__
+
+## Usage
+
+Plugin works together with [Kotlin Multiplatform plugin](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.multiplatform).
+
+
