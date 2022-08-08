@@ -1,6 +1,6 @@
-package com.ttypic.swiftklib.gradle.task
+package io.github.ttypic.swiftklib.gradle.task
 
-import com.ttypic.swiftklib.gradle.CompileTarget
+import io.github.ttypic.swiftklib.gradle.CompileTarget
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*

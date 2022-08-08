@@ -12,10 +12,10 @@ dependencies {
 gradlePlugin {
     plugins {
         create("swiftklib") {
-            id = "com.ttypic.swiftklib"
+            id = "io.github.ttypic.swiftklib"
             displayName = "SwiftKlib Gradle Plugin"
             description = "SwiftKlib Gradle Plugin"
-            implementationClass = "com.ttypic.swiftklib.gradle.SwiftKlibPlugin"
+            implementationClass = "io.github.ttypic.swiftklib.gradle.SwiftKlibPlugin"
         }
     }
 }

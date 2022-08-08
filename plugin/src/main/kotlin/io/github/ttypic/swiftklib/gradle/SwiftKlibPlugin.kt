@@ -1,6 +1,6 @@
-package com.ttypic.swiftklib.gradle
+package io.github.ttypic.swiftklib.gradle
 
-import com.ttypic.swiftklib.gradle.task.CompileSwift
+import io.github.ttypic.swiftklib.gradle.task.CompileSwift
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project

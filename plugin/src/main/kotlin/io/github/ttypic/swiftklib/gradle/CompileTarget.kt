@@ -1,4 +1,4 @@
-package com.ttypic.swiftklib.gradle
+package io.github.ttypic.swiftklib.gradle
 
 @Suppress("EnumEntryName")
 enum class CompileTarget {

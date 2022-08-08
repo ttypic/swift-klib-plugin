@@ -1,4 +1,4 @@
-package com.ttypic.swiftklib.gradle
+package io.github.ttypic.swiftklib.gradle
 
 import org.gradle.api.provider.Property
 import java.io.File
