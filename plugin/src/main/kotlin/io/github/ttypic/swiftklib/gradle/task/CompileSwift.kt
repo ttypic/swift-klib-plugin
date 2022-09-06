@@ -13,7 +13,7 @@ import javax.inject.Inject
 open class CompileSwift @Inject constructor(
     @Input val cinteropName: String,
     @Input val compileTarget: CompileTarget,
-    @Input val pathProperty: Property<File>,
+    @InputDirectory val pathProperty: Property<File>,
     @Input val packageNameProperty: Property<String>,
     @Optional @Input val minIosProperty: Property<Int>,
 ) : DefaultTask() {
