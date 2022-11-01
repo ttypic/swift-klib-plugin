@@ -83,7 +83,7 @@ open class CompileSwift @Inject constructor(
             it.standardOutput = stdout
         }
 
-        val sdkPath = stdout.toString()
+        val sdkPath = stdout.toString().trim()
 
         path.copyRecursively(File(swiftBuildDir, cinteropName), true)
 
@@ -99,7 +99,7 @@ open class CompileSwift @Inject constructor(
                 "-Xswiftc",
                 "-sdk",
                 "-Xswiftc",
-                sdkPath.trim(),
+                sdkPath,
                 "-Xswiftc",
                 "-target",
                 "-Xswiftc",
