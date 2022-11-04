@@ -28,9 +28,9 @@ Make sure that Swift API you want to expose to Kotlin is [compatible with Object
 
 ```swift
 @objc public class HelloWorld : NSObject {
-  @objc public func helloWorld() -> String {
-      return "HeLLo WorLd!"
-  }
+    @objc public class func helloWorld() -> String {
+        return "HeLLo WorLd!"
+    }
 }
 ```
 
@@ -71,3 +71,4 @@ swiftklib {
 }
 ```
 
+That's it! Example usage you could find in `example/` folder
