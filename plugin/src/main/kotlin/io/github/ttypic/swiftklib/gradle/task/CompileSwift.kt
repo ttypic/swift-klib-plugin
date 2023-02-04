@@ -7,6 +7,8 @@ import org.gradle.api.tasks.*
 import org.gradle.configurationcache.extensions.capitalized
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.math.BigInteger
+import java.security.MessageDigest
 import javax.inject.Inject
 
 
@@ -119,6 +121,7 @@ open class CompileSwift @Inject constructor(
             language = Objective-C
             headers = ${headerPath.absolutePath}
 
+            # md5 ${libPath.md5()}
             staticLibraries = ${libPath.name}
             libraryPaths = ${libPath.parentFile.absolutePath}
 
@@ -156,6 +159,10 @@ private fun File.create(content: String) {
         it.write(content)
     }
 }
+
+private fun File.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(readBytes()))
+    .toString(16)
+    .padStart(32, '0')
 
 private data class SwiftBuildResult(
     val libPath: File,
