@@ -16,6 +16,8 @@ it hasn't been tested in different environments and setups. If you like the idea
 have trouble with setup, don't hesitate and create issue or start a discussion. Any feedback is
 very much appreciated._
 
+**Note:** _Plugin has been tested on Gradle 7.5+, Xcode 13+_
+
 ## Usage
 
 Plugin works together with [Kotlin Multiplatform plugin](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.multiplatform).
@@ -74,3 +76,7 @@ swiftklib {
 ### Examples
 
 More samples can be found in the [example/](https://github.com/ttypic/swift-klib-plugin/tree/main/example) folder.
+
+## License
+
+This package is licensed under MIT license.
