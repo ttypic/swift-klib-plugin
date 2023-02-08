@@ -18,6 +18,33 @@ very much appreciated._
 
 **Note:** _Plugin has been tested on Gradle 7.5+, Xcode 13+_
 
+## Installation
+
+Using the [plugins DSL](https://docs.gradle.org/current/userguide/plugins.html#sec:plugins_block):
+
+```kotlin
+plugins {
+    id("io.github.ttypic.swiftklib") version "0.1.0"
+}
+```
+
+Using [legacy plugin application](https://docs.gradle.org/current/userguide/plugins.html#sec:old_plugin_application):
+
+```kotlin
+buildscript {
+  repositories {
+    maven {
+      url = uri("https://plugins.gradle.org/m2/")
+    }
+  }
+  dependencies {
+    classpath("io.github.ttypic:plugin:0.1.0")
+  }
+}
+
+apply(plugin = "io.github.ttypic.swiftklib")
+```
+
 ## Usage
 
 Plugin works together with [Kotlin Multiplatform plugin](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.multiplatform).
