@@ -4,7 +4,6 @@ import org.gradle.api.provider.Property
 import java.io.File
 import javax.inject.Inject
 
-
 abstract class SwiftKlibEntry @Inject constructor(val name: String) {
 
     abstract val pathProperty: Property<File>
@@ -24,5 +23,4 @@ abstract class SwiftKlibEntry @Inject constructor(val name: String) {
         set(value) {
             minIosProperty.set(value)
         }
-
 }

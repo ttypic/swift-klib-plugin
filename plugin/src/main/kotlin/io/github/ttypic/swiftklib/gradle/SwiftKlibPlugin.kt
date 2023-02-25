@@ -1,12 +1,14 @@
 package io.github.ttypic.swiftklib.gradle
 
-import io.github.ttypic.swiftklib.gradle.task.CompileSwift
+import io.github.ttypic.swiftklib.gradle.task.CompileSwiftTask
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
+
+const val EXTENSION_NAME = "swiftklib"
 
 class SwiftKlibPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -17,19 +19,19 @@ class SwiftKlibPlugin : Plugin<Project> {
                 objects.newInstance(SwiftKlibEntry::class.java, name)
             }
 
-        project.extensions.add("swiftklib", swiftKlibEntries)
+        project.extensions.add(EXTENSION_NAME, swiftKlibEntries)
 
         swiftKlibEntries.all { entry ->
             val name: String = entry.name
 
             val targetToTaskName = CompileTarget.values().associateWith {
-                "swiftklib${name.capitalized()}${it.name.capitalized()}"
+                getTaskName(name, it)
             }
 
             targetToTaskName.entries.forEach { (target, taskName) ->
                 tasks.register(
                     taskName,
-                    CompileSwift::class.java,
+                    CompileSwiftTask::class.java,
                     name,
                     target,
                     entry.pathProperty,
@@ -42,12 +44,17 @@ class SwiftKlibPlugin : Plugin<Project> {
         tasks.withType(CInteropProcess::class.java).configureEach { cinterop ->
             val cinteropTarget = CompileTarget.byKonanName(cinterop.konanTarget.name)
                 ?: return@configureEach
-            val taskName =
-                "swiftklib${cinterop.interopName.capitalized()}${cinteropTarget.name.capitalized()}"
-            val task = (tasks.findByName(taskName) as CompileSwift?) ?: return@configureEach
+
+            val taskName = getTaskName(cinterop.interopName, cinteropTarget)
+
+            val task = tasks.withType(CompileSwiftTask::class.java).findByName(taskName)
+                ?: return@configureEach
 
             cinterop.settings.defFile = task.defFile
             cinterop.dependsOn(task)
         }
     }
 }
+
+private fun getTaskName(cinteropName: String, cinteropTarget: CompileTarget) =
+    "${EXTENSION_NAME}${cinteropName.capitalized()}${cinteropTarget.name.capitalized()}"

@@ -12,7 +12,7 @@ import java.security.MessageDigest
 import javax.inject.Inject
 
 
-open class CompileSwift @Inject constructor(
+open class CompileSwiftTask @Inject constructor(
     @Input val cinteropName: String,
     @Input val compileTarget: CompileTarget,
     @InputDirectory val pathProperty: Property<File>,
@@ -110,8 +110,14 @@ open class CompileSwift @Inject constructor(
         }
 
         return SwiftBuildResult(
-            libPath = File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-macosx/release/lib${cinteropName.capitalized()}.a"),
-            headerPath = File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-macosx/release/$cinteropName.build/$cinteropName-Swift.h")
+            libPath = File(
+                swiftBuildDir,
+                ".build/${compileTarget.arch()}-apple-macosx/release/lib${cinteropName.capitalized()}.a"
+            ),
+            headerPath = File(
+                swiftBuildDir,
+                ".build/${compileTarget.arch()}-apple-macosx/release/$cinteropName.build/$cinteropName-Swift.h"
+            )
         )
     }
 
@@ -131,28 +137,10 @@ open class CompileSwift @Inject constructor(
     }
 }
 
-private fun CompileTarget.os() = when(this) {
-    CompileTarget.iosX64 -> "iphonesimulator"
-    CompileTarget.iosArm64 -> "iphoneos"
-    CompileTarget.iosSimulatorArm64 -> "iphonesimulator"
-}
-
-private fun CompileTarget.arch() = when(this) {
-    CompileTarget.iosX64 -> "x86_64"
-    CompileTarget.iosArm64 -> "arm64"
-    CompileTarget.iosSimulatorArm64 -> "arm64"
-}
-private fun CompileTarget.simulatorSuffix() = when(this) {
-    CompileTarget.iosX64 -> "-simulator"
-    CompileTarget.iosArm64 -> ""
-    CompileTarget.iosSimulatorArm64 -> "-simulator"
-}
-
-private fun CompileTarget.linkerMinIosVersionName() = when(this) {
-    CompileTarget.iosX64 -> "ios_simulator_version_min"
-    CompileTarget.iosArm64 -> "ios_version_min"
-    CompileTarget.iosSimulatorArm64 -> "ios_simulator_version_min"
-}
+private data class SwiftBuildResult(
+    val libPath: File,
+    val headerPath: File,
+)
 
 private fun File.create(content: String) {
     bufferedWriter().use {
@@ -163,8 +151,3 @@ private fun File.create(content: String) {
 private fun File.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(readBytes()))
     .toString(16)
     .padStart(32, '0')
-
-private data class SwiftBuildResult(
-    val libPath: File,
-    val headerPath: File,
-)
