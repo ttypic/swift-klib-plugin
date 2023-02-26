@@ -1,8 +1,4 @@
-<picture>
-  <source media="(prefers-color-scheme: light)" srcset="docs/media/swiftklib-light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="docs/media/swiftklib-dark.svg">
-  <img src="docs/media/swiftklib-dark.svg" width="300">
-</picture>
+<img src="https://github.com/ttypic/swift-klib-plugin/raw/main/docs/media/swiftklib-light.svg" alt="Swift Klib library logo" width="300">
 
 <br/>
 
