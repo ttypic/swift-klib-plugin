@@ -1,6 +1,7 @@
 package io.github.ttypic.swiftklib.gradle.task
 
 import io.github.ttypic.swiftklib.gradle.CompileTarget
+import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -10,7 +11,6 @@ import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
 import javax.inject.Inject
-
 
 open class CompileSwiftTask @Inject constructor(
     @Input val cinteropName: String,
@@ -23,7 +23,7 @@ open class CompileSwiftTask @Inject constructor(
     @get:Internal
     internal val targetDir: File
         get() {
-            return project.buildDir.resolve("swiftklib/$cinteropName/$compileTarget")
+            return project.buildDir.resolve("${EXTENSION_NAME}/$cinteropName/$compileTarget")
         }
 
     @get:OutputDirectory
@@ -36,16 +36,37 @@ open class CompileSwiftTask @Inject constructor(
 
     @TaskAction
     fun produce() {
-        val path: File = pathProperty.get()
         val packageName: String = packageNameProperty.get()
         val minIos: Int = minIosProperty.getOrElse(13)
 
-        swiftBuildDir.mkdirs()
+        prepareBuildDirectory()
         createPackageSwift()
-        val (libPath, headerPath) = buildSwift(path, minIos)
-        createDefFile(libPath, headerPath, packageName, minIos)
+        val (libPath, headerPath) = buildSwift(minIos)
+
+        createDefFile(
+            minIos = minIos,
+            libPath = libPath,
+            headerPath = headerPath,
+            packageName = packageName,
+        )
     }
 
+    /**
+     * Creates build directory or cleans up if it already exists
+     * and copies Swift source files to it
+     */
+    private fun prepareBuildDirectory() {
+        val path: File = pathProperty.get()
+
+        if (swiftBuildDir.exists()) swiftBuildDir.deleteRecursively()
+
+        swiftBuildDir.mkdirs()
+        path.copyRecursively(File(swiftBuildDir, cinteropName), true)
+    }
+
+    /**
+     * Creates `Package.Swift` file for the library
+     */
     private fun createPackageSwift() {
         val content = """
             // swift-tools-version:5.5
@@ -72,41 +93,11 @@ open class CompileSwiftTask @Inject constructor(
         File(swiftBuildDir, "Package.swift").create(content)
     }
 
-    private fun buildSwift(path: File, minIos: Int): SwiftBuildResult {
-        val stdout = ByteArrayOutputStream()
-
-        project.exec {
-            it.executable = "xcrun"
-            it.args = listOf(
-                "--sdk",
-                compileTarget.os(),
-                "--show-sdk-path",
-            )
-            it.standardOutput = stdout
-        }
-
-        val sdkPath = stdout.toString().trim()
-
-        path.copyRecursively(File(swiftBuildDir, cinteropName), true)
-
+    private fun buildSwift(minIos: Int): SwiftBuildResult {
         project.exec {
             it.executable = "swift"
             it.workingDir = swiftBuildDir
-            it.args = listOf(
-                "build",
-                "--arch",
-                compileTarget.arch(),
-                "-c",
-                "release",
-                "-Xswiftc",
-                "-sdk",
-                "-Xswiftc",
-                sdkPath,
-                "-Xswiftc",
-                "-target",
-                "-Xswiftc",
-                "${compileTarget.arch()}-apple-ios${minIos}.0${compileTarget.simulatorSuffix()}",
-            )
+            it.args = generateBuildArgs(minIos)
         }
 
         return SwiftBuildResult(
@@ -121,6 +112,44 @@ open class CompileSwiftTask @Inject constructor(
         )
     }
 
+    private fun generateBuildArgs(minIos: Int): List<String> = listOf(
+        "build",
+        "--arch",
+        compileTarget.arch(),
+        "-c",
+        "release",
+        "-Xswiftc",
+        "-sdk",
+        "-Xswiftc",
+        readSdkPath(),
+        "-Xswiftc",
+        "-target",
+        "-Xswiftc",
+        "${compileTarget.arch()}-apple-ios${minIos}.0${compileTarget.simulatorSuffix()}",
+    )
+
+    private fun readSdkPath(): String {
+        val stdout = ByteArrayOutputStream()
+
+        project.exec {
+            it.executable = "xcrun"
+            it.args = listOf(
+                "--sdk",
+                compileTarget.os(),
+                "--show-sdk-path",
+            )
+            it.standardOutput = stdout
+        }
+
+        return stdout.toString().trim()
+    }
+
+    /**
+     * Generates Def-file for Kotlin/Native Cinterop
+     *
+     * Note: adds lib-file md5 hash to library in order to automatically
+     * invalidate connected cinterop task
+     */
     private fun createDefFile(libPath: File, headerPath: File, packageName: String, minIos: Int) {
         val content = """
             package = $packageName
