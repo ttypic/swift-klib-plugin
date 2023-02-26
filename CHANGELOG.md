@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 0.2.0 2022-02-26
+
+* **Fix:** add step to clean old build files in build directory
+* Light refactoring of source code
+
 ## 0.1.0 2022-02-08
 
 * Invalidate cinterop task if source Swift-files have changed

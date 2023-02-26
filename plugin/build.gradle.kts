@@ -9,7 +9,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22")
 }
 
-version = "0.2.0-SNAPSHOT"
+version = "0.2.0"
 group = "io.github.ttypic"
 
 gradlePlugin {
