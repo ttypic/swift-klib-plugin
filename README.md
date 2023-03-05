@@ -100,7 +100,7 @@ swiftklib {
 
 ### Examples
 
-More samples can be found in the [example/](https://github.com/ttypic/swift-klib-plugin/tree/main/example) folder.
+More samples can be found in the [examples/](https://github.com/ttypic/swift-klib-plugin/tree/main/examples) folder.
 
 ## License
 
