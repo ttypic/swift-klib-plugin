@@ -9,8 +9,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22")
 }
 
-version = "0.3.0-SNAPSHOT"
+version = "0.2.1"
 group = "io.github.ttypic"
+
+kotlin {
+    jvmToolchain(8)
+}
 
 gradlePlugin {
     website.set("https://github.com/ttypic/swift-klib-plugin")

@@ -1,7 +1,5 @@
 <img src="https://github.com/ttypic/swift-klib-plugin/raw/main/docs/media/swiftklib-light.svg" alt="Swift Klib library logo" width="300">
 
-<br/>
-
 # Swift Klib Gradle Plugin
 
 This gradle plugin provides easy way to include your Swift source files in your **Kotlin Multiplatform Mobile**
@@ -24,7 +22,7 @@ Using the [plugins DSL](https://docs.gradle.org/current/userguide/plugins.html#s
 
 ```kotlin
 plugins {
-    id("io.github.ttypic.swiftklib") version "0.2.0"
+    id("io.github.ttypic.swiftklib") version "0.2.1"
 }
 ```
 
@@ -38,7 +36,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath("io.github.ttypic:plugin:0.2.0")
+    classpath("io.github.ttypic:plugin:0.2.1")
   }
 }
 
