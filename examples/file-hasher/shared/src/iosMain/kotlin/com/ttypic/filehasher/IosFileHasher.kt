@@ -14,11 +14,11 @@ actual object FileHasherFactory {
 
 object FileMd5Hasher : FileHasher {
     override fun hash(data: ByteArray): String {
-        return KCrypto.md5WithData(data = data.toNSData())
+        return KCrypto.md5(data = data.toNSData())
     }
 
     fun hash(nsdata: NSData): String {
-        return KCrypto.md5WithData(data = nsdata)
+        return KCrypto.md5(data = nsdata)
     }
 }
 
