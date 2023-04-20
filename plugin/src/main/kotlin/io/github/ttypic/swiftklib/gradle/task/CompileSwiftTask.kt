@@ -95,7 +95,7 @@ open class CompileSwiftTask @Inject constructor(
 
     private fun buildSwift(minIos: Int): SwiftBuildResult {
         project.exec {
-            it.executable = "swift"
+            it.executable = "xcrun"
             it.workingDir = swiftBuildDir
             it.args = generateBuildArgs(minIos)
         }
@@ -103,7 +103,7 @@ open class CompileSwiftTask @Inject constructor(
         return SwiftBuildResult(
             libPath = File(
                 swiftBuildDir,
-                ".build/${compileTarget.arch()}-apple-macosx/release/lib${cinteropName.capitalized()}.a"
+                ".build/${compileTarget.arch()}-apple-macosx/release/lib${cinteropName}.a"
             ),
             headerPath = File(
                 swiftBuildDir,
@@ -113,6 +113,7 @@ open class CompileSwiftTask @Inject constructor(
     }
 
     private fun generateBuildArgs(minIos: Int): List<String> = listOf(
+        "swift",
         "build",
         "--arch",
         compileTarget.arch(),
