@@ -33,10 +33,26 @@ internal fun CompileTarget.simulatorSuffix() = when(this) {
     CompileTarget.iosX64 -> "-simulator"
     CompileTarget.iosArm64 -> ""
     CompileTarget.iosSimulatorArm64 -> "-simulator"
+    CompileTarget.watchosX64 -> "-simulator"
+    CompileTarget.watchosArm64 -> ""
+    CompileTarget.watchosSimulatorArm64 -> "-simulator"
+    CompileTarget.tvosX64 -> "-simulator"
+    CompileTarget.tvosArm64 -> ""
+    CompileTarget.tvosSimulatorArm64 -> "-simulator"
+    CompileTarget.macosX64 -> ""
+    CompileTarget.macosArm64 -> ""
 }
 
-internal fun CompileTarget.linkerMinIosVersionName() = when(this) {
+internal fun CompileTarget.linkerMinOsVersionName() = when(this) {
     CompileTarget.iosX64 -> "ios_simulator_version_min"
     CompileTarget.iosArm64 -> "ios_version_min"
     CompileTarget.iosSimulatorArm64 -> "ios_simulator_version_min"
+    CompileTarget.watchosX64 -> "watchos_simulator_version_min"
+    CompileTarget.watchosArm64 -> "watchos_version_min"
+    CompileTarget.watchosSimulatorArm64 -> "watchos_simulator_version_min"
+    CompileTarget.tvosX64 -> "tvos_simulator_version_min"
+    CompileTarget.tvosArm64 -> "tvos_version_min"
+    CompileTarget.tvosSimulatorArm64 -> "tvos_simulator_version_min"
+    CompileTarget.macosX64 -> "macosx_version_min"
+    CompileTarget.macosArm64 -> "macosx_version_min"
 }

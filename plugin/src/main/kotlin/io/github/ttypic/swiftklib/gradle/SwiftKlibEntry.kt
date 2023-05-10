@@ -9,6 +9,7 @@ abstract class SwiftKlibEntry @Inject constructor(val name: String) {
     abstract val pathProperty: Property<File>
     abstract val packageNameProperty: Property<String>
     abstract val minIosProperty: Property<Int>
+    abstract val minMacosxProperty: Property<Int>
 
     var path: File
         get() = pathProperty.get()
@@ -22,5 +23,11 @@ abstract class SwiftKlibEntry @Inject constructor(val name: String) {
         get() = minIosProperty.get()
         set(value) {
             minIosProperty.set(value)
+        }
+
+    var minMacosx: Int
+        get() = minMacosxProperty.get()
+        set(value) {
+            minMacosxProperty.set(value)
         }
 }
