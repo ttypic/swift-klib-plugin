@@ -18,6 +18,7 @@ open class CompileSwiftTask @Inject constructor(
     @InputDirectory val pathProperty: Property<File>,
     @Input val packageNameProperty: Property<String>,
     @Optional @Input val minIosProperty: Property<Int>,
+    @Optional @Input val minMacosxProperty: Property<Int>,
 ) : DefaultTask() {
 
     @get:Internal
@@ -38,13 +39,15 @@ open class CompileSwiftTask @Inject constructor(
     fun produce() {
         val packageName: String = packageNameProperty.get()
         val minIos: Int = minIosProperty.getOrElse(13)
+        val minMacosx: Int = minMacosxProperty.getOrElse(11)
 
         prepareBuildDirectory()
         createPackageSwift()
-        val (libPath, headerPath) = buildSwift(minIos)
+        val (libPath, headerPath) = buildSwift(minIos, minMacosx)
 
         createDefFile(
             minIos = minIos,
+            minMacosx = minMacosx,
             libPath = libPath,
             headerPath = headerPath,
             packageName = packageName,
@@ -93,11 +96,11 @@ open class CompileSwiftTask @Inject constructor(
         File(swiftBuildDir, "Package.swift").create(content)
     }
 
-    private fun buildSwift(minIos: Int): SwiftBuildResult {
+    private fun buildSwift(minIos: Int, minMacosx: Int): SwiftBuildResult {
         project.exec {
             it.executable = "xcrun"
             it.workingDir = swiftBuildDir
-            it.args = generateBuildArgs(minIos)
+            it.args = generateBuildArgs(minIos, minMacosx)
         }
 
         return SwiftBuildResult(
@@ -112,7 +115,7 @@ open class CompileSwiftTask @Inject constructor(
         )
     }
 
-    private fun generateBuildArgs(minIos: Int): List<String> = listOf(
+    private fun generateBuildArgs(minIos: Int, minMacosx: Int): List<String> = listOf(
         "swift",
         "build",
         "--arch",
@@ -126,7 +129,7 @@ open class CompileSwiftTask @Inject constructor(
         "-Xswiftc",
         "-target",
         "-Xswiftc",
-        "${compileTarget.arch()}-apple-ios${minIos}.0${compileTarget.simulatorSuffix()}",
+        "${compileTarget.arch()}-apple-${operatingSystem(compileTarget, minIos, minMacosx)}.0${compileTarget.simulatorSuffix()}",
     )
 
     private fun readSdkPath(): String {
@@ -151,7 +154,7 @@ open class CompileSwiftTask @Inject constructor(
      * Note: adds lib-file md5 hash to library in order to automatically
      * invalidate connected cinterop task
      */
-    private fun createDefFile(libPath: File, headerPath: File, packageName: String, minIos: Int) {
+    private fun createDefFile(libPath: File, headerPath: File, packageName: String, minIos: Int, minMacosx: Int) {
         val content = """
             package = $packageName
             language = Objective-C
@@ -161,7 +164,7 @@ open class CompileSwiftTask @Inject constructor(
             staticLibraries = ${libPath.name}
             libraryPaths = ${libPath.parentFile.absolutePath}
 
-            linkerOpts = -L/usr/lib/swift -${compileTarget.linkerMinIosVersionName()} $minIos.0 -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
+            linkerOpts = -L/usr/lib/swift -${compileTarget.linkerMinOsVersionName()} ${minOs(compileTarget, minIos, minMacosx)}.0 -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
         """.trimIndent()
         defFile.create(content)
     }
@@ -181,3 +184,19 @@ private fun File.create(content: String) {
 private fun File.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(readBytes()))
     .toString(16)
     .padStart(32, '0')
+
+private fun operatingSystem(compileTarget: CompileTarget, minIos: Int, minMacosx: Int): String =
+    when (compileTarget) {
+        CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> "ios$minIos"
+        CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> "watchos$minIos"
+        CompileTarget.tvosX64, CompileTarget.tvosArm64, CompileTarget.tvosSimulatorArm64 -> "tvos$minIos"
+        CompileTarget.macosX64, CompileTarget.macosArm64 -> "macosx$minMacosx"
+    }
+
+private fun minOs(compileTarget: CompileTarget, minIos: Int, minMacosx: Int): Int =
+    when (compileTarget) {
+        CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> minIos
+        CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> minIos
+        CompileTarget.tvosX64, CompileTarget.tvosArm64, CompileTarget.tvosSimulatorArm64 -> minIos
+        CompileTarget.macosX64, CompileTarget.macosArm64 -> minMacosx
+    }
