@@ -29,6 +29,12 @@ internal fun CompileTarget.arch() = when(this) {
     CompileTarget.macosX64 -> "x86_64"
     CompileTarget.macosArm64 -> "arm64"
 }
+
+internal fun CompileTarget.archPrefix() = when(this) {
+    CompileTarget.watchosArm64 -> "arm64_32"
+    else -> arch()
+}
+
 internal fun CompileTarget.simulatorSuffix() = when(this) {
     CompileTarget.iosX64 -> "-simulator"
     CompileTarget.iosArm64 -> ""
