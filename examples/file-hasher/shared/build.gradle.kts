@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id("io.github.ttypic.swiftklib") version "0.2.1"
+    id("io.github.ttypic.swiftklib") version "0.3.0"
 }
 
 kotlin {
