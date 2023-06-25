@@ -2,6 +2,11 @@
 
 # Swift Klib Gradle Plugin
 
+![badge][badge-ios]
+![badge][badge-mac]
+![badge][badge-tvos]
+![badge][badge-watchos]
+
 This gradle plugin provides easy way to include your Swift source files in your **Kotlin Multiplatform Mobile**
 shared module and access them in Kotlin via `cinterop` for iOS targets. It is useful for:
 
@@ -17,7 +22,7 @@ Using the [plugins DSL](https://docs.gradle.org/current/userguide/plugins.html#s
 
 ```kotlin
 plugins {
-    id("io.github.ttypic.swiftklib") version "0.2.1"
+    id("io.github.ttypic.swiftklib") version "0.3.0"
 }
 ```
 
@@ -31,7 +36,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath("io.github.ttypic:plugin:0.2.1")
+    classpath("io.github.ttypic:plugin:0.3.0")
   }
 }
 
