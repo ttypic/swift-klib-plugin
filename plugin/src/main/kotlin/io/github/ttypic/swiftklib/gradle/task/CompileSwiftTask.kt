@@ -102,7 +102,12 @@ open class CompileSwiftTask @Inject constructor(
         project.exec {
             it.executable = "xcrun"
             it.workingDir = swiftBuildDir
-            it.args = generateBuildArgs()
+            val extraArgs = if (compileTarget == CompileTarget.iosArm64) {
+                additionalSysrootArgs()
+            } else {
+                emptyList()
+            }
+            it.args = generateBuildArgs() + extraArgs
         }
 
         return SwiftBuildResult(
@@ -132,6 +137,14 @@ open class CompileSwiftTask @Inject constructor(
         "-target",
         "-Xswiftc",
         "${compileTarget.archPrefix()}-apple-${operatingSystem(compileTarget)}.0${compileTarget.simulatorSuffix()}",
+    )
+
+    /** Workaround for bug in toolchain where the sdk path (via `swiftc -sdk` flag) is not propagated to clang. */
+    private fun additionalSysrootArgs(): List<String> = listOf(
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        readSdkPath(),
     )
 
     private fun readSdkPath(): String {
