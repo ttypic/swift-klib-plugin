@@ -117,22 +117,29 @@ open class CompileSwiftTask @Inject constructor(
         )
     }
 
-    private fun generateBuildArgs(): List<String> = listOf(
-        "swift",
-        "build",
-        "--arch",
-        compileTarget.arch(),
-        "-c",
-        "release",
-        "-Xswiftc",
-        "-sdk",
-        "-Xswiftc",
-        readSdkPath(),
-        "-Xswiftc",
-        "-target",
-        "-Xswiftc",
-        "${compileTarget.archPrefix()}-apple-${operatingSystem(compileTarget)}.0${compileTarget.simulatorSuffix()}",
-    )
+    private fun generateBuildArgs(): List<String> {
+        val sdkPath = readSdkPath()
+        return listOf(
+            "swift",
+            "build",
+            "--arch",
+            compileTarget.arch(),
+            "-c",
+            "release",
+            "-Xswiftc",
+            "-sdk",
+            "-Xswiftc",
+            sdkPath,
+            "-Xswiftc",
+            "-target",
+            "-Xswiftc",
+            "${compileTarget.archPrefix()}-apple-${operatingSystem(compileTarget)}.0${compileTarget.simulatorSuffix()}",
+            "-Xcc",
+            "-isysroot",
+            "-Xcc",
+            sdkPath,
+        )
+    }
 
     private fun readSdkPath(): String {
         val stdout = ByteArrayOutputStream()
