@@ -163,6 +163,18 @@ open class CompileSwiftTask @Inject constructor(
         return stdout.toString().trim()
     }
 
+    private fun readXcodePath(): String {
+        val stdout = ByteArrayOutputStream()
+
+        project.exec {
+            it.executable = "xcode-select"
+            it.args = listOf("--print-path")
+            it.standardOutput = stdout
+        }
+
+        return stdout.toString().trim()
+    }
+
     /**
      * Generates Def-file for Kotlin/Native Cinterop
      *
@@ -170,6 +182,7 @@ open class CompileSwiftTask @Inject constructor(
      * invalidate connected cinterop task
      */
     private fun createDefFile(libPath: File, headerPath: File, packageName: String) {
+        val xcodePath = readXcodePath()
         val content = """
             package = $packageName
             language = Objective-C
@@ -179,7 +192,7 @@ open class CompileSwiftTask @Inject constructor(
             staticLibraries = ${libPath.name}
             libraryPaths = ${libPath.parentFile.absolutePath}
 
-            linkerOpts = -L/usr/lib/swift -${compileTarget.linkerMinOsVersionName()} ${minOs(compileTarget)}.0 -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
+            linkerOpts = -L/usr/lib/swift -${compileTarget.linkerMinOsVersionName()} ${minOs(compileTarget)}.0 -L${xcodePath}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
         """.trimIndent()
         defFile.create(content)
     }
