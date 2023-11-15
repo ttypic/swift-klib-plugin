@@ -14,7 +14,7 @@ shared module and access them in Kotlin via `cinterop` for iOS targets. It is us
 * Creating a Kotlin-Friendly Swift API
 * Learning how Swift <-> Kotlin interoperability works
 
-**Note:** _Plugin has been tested on Gradle 7.5+, Xcode 13+_
+**Note:** _Plugin has been tested on Gradle 7.5+, Xcode 15+_
 
 ## Installation
 

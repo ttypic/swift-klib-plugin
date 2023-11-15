@@ -179,7 +179,7 @@ open class CompileSwiftTask @Inject constructor(
             staticLibraries = ${libPath.name}
             libraryPaths = ${libPath.parentFile.absolutePath}
 
-            linkerOpts = -L/usr/lib/swift -${compileTarget.linkerMinOsVersionName()} ${minOs(compileTarget)}.0 -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
+            linkerOpts = -L/usr/lib/swift -${compileTarget.linkerPlatformVersionName()} ${minOs(compileTarget)}.0 ${minOs(compileTarget)}.0 -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
         """.trimIndent()
         defFile.create(content)
     }
