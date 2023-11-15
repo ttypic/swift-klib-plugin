@@ -7,6 +7,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.lang.IllegalStateException
 import java.math.BigInteger
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -56,6 +57,10 @@ open class CompileSwiftTask @Inject constructor(
     private val minTvos get() = minTvosProperty.getOrElse(13)
     private val minWatchos get() = minWatchosProperty.getOrElse(8)
 
+    private val xcodeVersion: Int by lazy {
+        readXcodeMajorVersion()
+    }
+
     /**
      * Creates build directory or cleans up if it already exists
      * and copies Swift source files to it
@@ -102,7 +107,7 @@ open class CompileSwiftTask @Inject constructor(
         project.exec {
             it.executable = "xcrun"
             it.workingDir = swiftBuildDir
-            val extraArgs = if (compileTarget == CompileTarget.iosArm64) {
+            val extraArgs = if (xcodeVersion >= 15 && compileTarget in SDKLESS_TARGETS) {
                 additionalSysrootArgs()
             } else {
                 emptyList()
@@ -163,6 +168,22 @@ open class CompileSwiftTask @Inject constructor(
         return stdout.toString().trim()
     }
 
+    private fun readXcodeMajorVersion(): Int {
+        val stdout = ByteArrayOutputStream()
+
+        project.exec {
+            it.executable = "xcodebuild"
+            it.args = listOf("-version")
+            it.standardOutput = stdout
+        }
+
+        val output = stdout.toString().trim()
+        val (_, majorVersion) = "Xcode (\\d+)\\.\\d+\\.\\d+".toRegex().find(output)?.groupValues
+            ?: throw IllegalStateException("Can't find Xcode")
+
+        return majorVersion.toInt()
+    }
+
     private fun readXcodePath(): String {
         val stdout = ByteArrayOutputStream()
 
@@ -217,6 +238,16 @@ open class CompileSwiftTask @Inject constructor(
 private data class SwiftBuildResult(
     val libPath: File,
     val headerPath: File,
+)
+
+val SDKLESS_TARGETS = listOf(
+    CompileTarget.iosArm64,
+    CompileTarget.watchosArm64,
+    CompileTarget.watchosX64,
+    CompileTarget.watchosSimulatorArm64,
+    CompileTarget.tvosArm64,
+    CompileTarget.tvosX64,
+    CompileTarget.tvosSimulatorArm64,
 )
 
 private fun File.create(content: String) {
