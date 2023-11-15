@@ -25,7 +25,7 @@ open class CompileSwiftTask @Inject constructor(
     @get:Internal
     internal val targetDir: File
         get() {
-            return project.buildDir.resolve("${EXTENSION_NAME}/$cinteropName/$compileTarget")
+            return project.layout.buildDirectory.dir("${EXTENSION_NAME}/$cinteropName/$compileTarget").get().asFile
         }
 
     @get:OutputDirectory
