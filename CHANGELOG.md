@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/ttypic/swift-klib-plugin/tree/HEAD)
 
+## 0.5.0 2023-11-16
+
+[Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.4.0...v0.5.0)
+
+**Merged pull requests:**
+
+- Support Xcode being installed in a non-default path [\#17](https://github.com/ttypic/swift-klib-plugin/pull/17) ([hartbit](https://github.com/hartbit))
+- fix: use platformVersion instead of min*Version linker flag for xcode 15 [\#19](https://github.com/ttypic/swift-klib-plugin/pull/19)
+
 ## 0.4.0 2023-10-08
 
 [Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.3.0...v0.4.0)
