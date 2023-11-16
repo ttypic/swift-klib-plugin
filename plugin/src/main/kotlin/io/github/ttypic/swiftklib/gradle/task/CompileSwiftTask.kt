@@ -204,6 +204,11 @@ open class CompileSwiftTask @Inject constructor(
      */
     private fun createDefFile(libPath: File, headerPath: File, packageName: String) {
         val xcodePath = readXcodePath()
+
+        val linkerPlatformVersion =
+            if (xcodeVersion >= 15) compileTarget.linkerPlatformVersionName()
+            else compileTarget.linkerMinOsVersionName()
+
         val content = """
             package = $packageName
             language = Objective-C
@@ -213,7 +218,7 @@ open class CompileSwiftTask @Inject constructor(
             staticLibraries = ${libPath.name}
             libraryPaths = ${libPath.parentFile.absolutePath}
 
-            linkerOpts = -L/usr/lib/swift -${compileTarget.linkerPlatformVersionName()} ${minOs(compileTarget)}.0 ${minOs(compileTarget)}.0 -L${xcodePath}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
+            linkerOpts = -L/usr/lib/swift -$linkerPlatformVersion ${minOs(compileTarget)}.0 ${minOs(compileTarget)}.0 -L${xcodePath}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
         """.trimIndent()
         defFile.create(content)
     }

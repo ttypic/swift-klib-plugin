@@ -58,3 +58,17 @@ internal fun CompileTarget.linkerPlatformVersionName() = when(this) {
     CompileTarget.tvosX64, CompileTarget.tvosSimulatorArm64 -> "platform_version tvos-simulator"
     CompileTarget.macosX64, CompileTarget.macosArm64 -> "platform_version macosx"
 }
+
+internal fun CompileTarget.linkerMinOsVersionName() = when(this) {
+    CompileTarget.iosX64 -> "ios_simulator_version_min"
+    CompileTarget.iosArm64 -> "ios_version_min"
+    CompileTarget.iosSimulatorArm64 -> "ios_simulator_version_min"
+    CompileTarget.watchosX64 -> "watchos_simulator_version_min"
+    CompileTarget.watchosArm64 -> "watchos_version_min"
+    CompileTarget.watchosSimulatorArm64 -> "watchos_simulator_version_min"
+    CompileTarget.tvosX64 -> "tvos_simulator_version_min"
+    CompileTarget.tvosArm64 -> "tvos_version_min"
+    CompileTarget.tvosSimulatorArm64 -> "tvos_simulator_version_min"
+    CompileTarget.macosX64 -> "macosx_version_min"
+    CompileTarget.macosArm64 -> "macosx_version_min"
+}

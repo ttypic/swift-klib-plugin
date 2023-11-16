@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.7.22"
+    kotlin("multiplatform") version "1.9.20"
     id("io.github.ttypic.swiftklib")
 }
 
