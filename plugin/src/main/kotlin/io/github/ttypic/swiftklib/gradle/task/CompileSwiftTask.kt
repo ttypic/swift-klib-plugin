@@ -178,7 +178,7 @@ open class CompileSwiftTask @Inject constructor(
         }
 
         val output = stdout.toString().trim()
-        val (_, majorVersion) = "Xcode (\\d+)\\.\\d+\\.\\d+".toRegex().find(output)?.groupValues
+        val (_, majorVersion) = "Xcode (\\d+)\\..*".toRegex().find(output)?.groupValues
             ?: throw IllegalStateException("Can't find Xcode")
 
         return majorVersion.toInt()
