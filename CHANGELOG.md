@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/ttypic/swift-klib-plugin/tree/HEAD)
 
+## 0.5.1 2023-11-24
+
+[Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.5.0...v0.5.1)
+
+**Merged pull requests:**
+
+- fix: more robust readXcodeMajorVersion [\#20](https://github.com/ttypic/swift-klib-plugin/pull/20)
+
 ## 0.5.0 2023-11-16
 
 [Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.4.0...v0.5.0)
