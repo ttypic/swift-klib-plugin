@@ -72,6 +72,15 @@ open class CompileSwiftTask @Inject constructor(
 
         swiftBuildDir.mkdirs()
         path.copyRecursively(File(swiftBuildDir, cinteropName), true)
+
+        // Check if Package.swift exists in the cinteropName directory
+        val packageSwiftFile = File(path, "Package.swift")
+        if (packageSwiftFile.exists()) {
+            packageSwiftFile.copyTo(File(swiftBuildDir, "Package.swift"), overwrite = true)
+        } else {
+            // call createPackageSwift() if Package.swift does not exist
+            createPackageSwift()
+        }
     }
 
     /**
