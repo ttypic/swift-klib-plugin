@@ -1,19 +1,19 @@
 plugins {
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.1.0"
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm") version "1.9.22"
 }
 
 dependencies {
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22")
 }
 
-version = "0.5.1"
+version = "0.5.2"
 group = "io.github.ttypic"
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(17)
 }
 
 gradlePlugin {
