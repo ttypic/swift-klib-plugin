@@ -1,12 +1,12 @@
 plugins {
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.2.1"
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.23"
 }
 
 dependencies {
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23")
 }
 
 version = "0.5.2"
