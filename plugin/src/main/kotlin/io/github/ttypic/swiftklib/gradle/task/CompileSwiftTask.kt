@@ -2,6 +2,7 @@ package io.github.ttypic.swiftklib.gradle.task
 
 import io.github.ttypic.swiftklib.gradle.CompileTarget
 import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -40,7 +41,7 @@ open class CompileSwiftTask @Inject constructor(
 
     @TaskAction
     fun produce() {
-        if(!org.gradle.internal.impldep.com.sun.jna.Platform.isMac())
+        if(!Os.isFamily(Os.FAMILY_MAC))
         {
             project.logger.warn("Not running on MacOS. Skipping Swift Klib generation")
             return
