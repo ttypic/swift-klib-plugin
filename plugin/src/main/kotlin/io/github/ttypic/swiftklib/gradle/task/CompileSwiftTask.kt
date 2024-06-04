@@ -5,6 +5,7 @@ import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.jetbrains.kotlin.konan.target.Platform
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.lang.IllegalStateException
@@ -39,6 +40,11 @@ open class CompileSwiftTask @Inject constructor(
 
     @TaskAction
     fun produce() {
+        if(!org.gradle.internal.impldep.com.sun.jna.Platform.isMac())
+        {
+            project.logger.warn("Not running on MacOS. Skipping Swift Klib generation")
+            return
+        }
         val packageName: String = packageNameProperty.get()
 
         prepareBuildDirectory()
