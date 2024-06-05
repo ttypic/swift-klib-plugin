@@ -13,7 +13,7 @@ version = "0.5.1"
 group = "io.github.ttypic"
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(17)
 }
 
 gradlePlugin {
