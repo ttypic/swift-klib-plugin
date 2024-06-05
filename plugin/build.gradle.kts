@@ -30,7 +30,3 @@ gradlePlugin {
         }
     }
 }
-
-repositories {
-    mavenCentral()
-}
