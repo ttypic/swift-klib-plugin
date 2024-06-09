@@ -13,13 +13,14 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
 import javax.inject.Inject
 
-open class CompileSwiftTask @Inject constructor(
+abstract class CompileSwiftTask @Inject constructor(
     @Input val cinteropName: String,
     @Input val compileTarget: CompileTarget,
     @Input val buildDirectory: String,
@@ -44,6 +45,9 @@ open class CompileSwiftTask @Inject constructor(
     @get:OutputFile
     val defFile
         get() = File(targetDir, "$cinteropName.def")
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
 
     @TaskAction
     fun produce() {
@@ -108,7 +112,7 @@ open class CompileSwiftTask @Inject constructor(
         logger.info("Working directory: $swiftBuildDir")
         logger.info("xcrun ${args.joinToString(" ")}")
 
-        project.exec {
+        execOperations.exec {
             it.executable = "xcrun"
             it.workingDir = swiftBuildDir
             it.args = args
@@ -163,7 +167,7 @@ open class CompileSwiftTask @Inject constructor(
     private fun readSdkPath(): String {
         val stdout = ByteArrayOutputStream()
 
-        project.exec {
+        execOperations.exec {
             it.executable = "xcrun"
             it.args = listOf(
                 "--sdk",
@@ -179,7 +183,7 @@ open class CompileSwiftTask @Inject constructor(
     private fun readXcodeMajorVersion(): Int {
         val stdout = ByteArrayOutputStream()
 
-        project.exec {
+        execOperations.exec {
             it.executable = "xcodebuild"
             it.args = listOf("-version")
             it.standardOutput = stdout
@@ -195,7 +199,7 @@ open class CompileSwiftTask @Inject constructor(
     private fun readXcodePath(): String {
         val stdout = ByteArrayOutputStream()
 
-        project.exec {
+        execOperations.exec {
             it.executable = "xcode-select"
             it.args = listOf("--print-path")
             it.standardOutput = stdout
