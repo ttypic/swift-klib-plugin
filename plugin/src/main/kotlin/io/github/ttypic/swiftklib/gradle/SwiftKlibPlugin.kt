@@ -28,12 +28,14 @@ class SwiftKlibPlugin : Plugin<Project> {
                 getTaskName(name, it)
             }
 
+            val buildDir = project.layout.buildDirectory.asFile.get().absolutePath
             targetToTaskName.entries.forEach { (target, taskName) ->
                 tasks.register(
                     taskName,
                     CompileSwiftTask::class.java,
                     name,
                     target,
+                    buildDir,
                     entry.pathProperty,
                     entry.packageNameProperty,
                     entry.minIosProperty,
