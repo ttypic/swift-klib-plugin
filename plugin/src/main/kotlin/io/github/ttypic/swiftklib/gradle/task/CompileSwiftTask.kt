@@ -55,12 +55,14 @@ abstract class CompileSwiftTask @Inject constructor(
 
         prepareBuildDirectory()
         createPackageSwift()
-        val (libPath, headerPath) = buildSwift()
+        val xcodeMajorVersion = readXcodeMajorVersion()
+        val (libPath, headerPath) = buildSwift(xcodeMajorVersion)
 
         createDefFile(
             libPath = libPath,
             headerPath = headerPath,
             packageName = packageName,
+            xcodeVersion = xcodeMajorVersion,
         )
     }
 
@@ -68,10 +70,6 @@ abstract class CompileSwiftTask @Inject constructor(
     private val minMacos get() = minMacosProperty.getOrElse(11)
     private val minTvos get() = minTvosProperty.getOrElse(13)
     private val minWatchos get() = minWatchosProperty.getOrElse(8)
-
-    private val xcodeVersion: Int by lazy {
-        readXcodeMajorVersion()
-    }
 
     /**
      * Creates build directory or cleans up if it already exists
@@ -97,7 +95,7 @@ abstract class CompileSwiftTask @Inject constructor(
             .create(createPackageSwiftContents(cinteropName))
     }
 
-    private fun buildSwift(): SwiftBuildResult {
+    private fun buildSwift(xcodeVersion: Int): SwiftBuildResult {
         val sourceFilePathReplacements = mapOf(
             buildDir().absolutePath to pathProperty.get().absolutePath
         )
@@ -214,7 +212,7 @@ abstract class CompileSwiftTask @Inject constructor(
      * Note: adds lib-file md5 hash to library in order to automatically
      * invalidate connected cinterop task
      */
-    private fun createDefFile(libPath: File, headerPath: File, packageName: String) {
+    private fun createDefFile(libPath: File, headerPath: File, packageName: String, xcodeVersion: Int) {
         val xcodePath = readXcodePath()
 
         val linkerPlatformVersion =
