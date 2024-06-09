@@ -92,7 +92,7 @@ abstract class CompileSwiftTask @Inject constructor(
      */
     private fun createPackageSwift() {
         File(swiftBuildDir, "Package.swift")
-            .create(createPackageSwiftContents(cinteropName))
+            .writeText(createPackageSwiftContents(cinteropName))
     }
 
     private fun buildSwift(xcodeVersion: Int): SwiftBuildResult {
@@ -249,7 +249,7 @@ abstract class CompileSwiftTask @Inject constructor(
         logger.info(content)
         logger.info("---/ cinterop def /---")
 
-        defFile.create(content)
+        defFile.writeText(content)
     }
 
     private fun CompileTarget.operatingSystem(): String =
@@ -285,12 +285,6 @@ val SDKLESS_TARGETS = listOf(
     CompileTarget.tvosX64,
     CompileTarget.tvosSimulatorArm64,
 )
-
-private fun File.create(content: String) {
-    bufferedWriter().use {
-        it.write(content)
-    }
-}
 
 private fun File.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(readBytes()))
     .toString(16)
