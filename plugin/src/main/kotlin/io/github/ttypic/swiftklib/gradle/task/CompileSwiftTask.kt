@@ -22,6 +22,7 @@ import javax.inject.Inject
 open class CompileSwiftTask @Inject constructor(
     @Input val cinteropName: String,
     @Input val compileTarget: CompileTarget,
+    @Input val buildDirectory: String,
     @InputDirectory val pathProperty: Property<File>,
     @Input val packageNameProperty: Property<String>,
     @Optional @Input val minIosProperty: Property<Int>,
@@ -33,7 +34,7 @@ open class CompileSwiftTask @Inject constructor(
     @get:Internal
     internal val targetDir: File
         get() {
-            return project.layout.buildDirectory.file("${EXTENSION_NAME}/$cinteropName/$compileTarget").get().asFile
+            return File(buildDirectory, "${EXTENSION_NAME}/$cinteropName/$compileTarget")
         }
 
     @get:OutputDirectory
