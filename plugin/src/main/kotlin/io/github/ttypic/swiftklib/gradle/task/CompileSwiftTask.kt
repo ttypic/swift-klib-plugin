@@ -2,12 +2,19 @@ package io.github.ttypic.swiftklib.gradle.task
 
 import io.github.ttypic.swiftklib.gradle.CompileTarget
 import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
+import io.github.ttypic.swiftklib.gradle.templates.createPackageSwiftContents
+import io.github.ttypic.swiftklib.gradle.util.StringReplacingOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.lang.IllegalStateException
 import java.math.BigInteger
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -71,39 +78,24 @@ open class CompileSwiftTask @Inject constructor(
         if (swiftBuildDir.exists()) swiftBuildDir.deleteRecursively()
 
         swiftBuildDir.mkdirs()
-        path.copyRecursively(File(swiftBuildDir, cinteropName), true)
+        path.copyRecursively(buildDir(), true)
     }
+
+    private fun buildDir() =
+        File(swiftBuildDir, cinteropName)
 
     /**
      * Creates `Package.Swift` file for the library
      */
     private fun createPackageSwift() {
-        val content = """
-            // swift-tools-version:5.5
-            import PackageDescription
-
-            let package = Package(
-            	name: "$cinteropName",
-            	products: [
-            		.library(
-            			name: "$cinteropName",
-            			type: .static,
-            			targets: ["$cinteropName"])
-            	],
-            	dependencies: [],
-            	targets: [
-            		.target(
-            			name: "$cinteropName",
-            			dependencies: [],
-            			path: "$cinteropName")
-            	]
-            )
-        """.trimIndent()
-
-        File(swiftBuildDir, "Package.swift").create(content)
+        File(swiftBuildDir, "Package.swift")
+            .create(createPackageSwiftContents(cinteropName))
     }
 
     private fun buildSwift(): SwiftBuildResult {
+        val sourceFilePathReplacements = mapOf(
+            buildDir().absolutePath to pathProperty.get().absolutePath
+        )
         project.exec {
             it.executable = "xcrun"
             it.workingDir = swiftBuildDir
@@ -113,6 +105,14 @@ open class CompileSwiftTask @Inject constructor(
                 emptyList()
             }
             it.args = generateBuildArgs() + extraArgs
+            it.standardOutput = StringReplacingOutputStream(
+                delegate = System.out,
+                replacements = sourceFilePathReplacements
+            )
+            it.errorOutput = StringReplacingOutputStream(
+                delegate = System.err,
+                replacements = sourceFilePathReplacements
+            )
         }
 
         return SwiftBuildResult(
