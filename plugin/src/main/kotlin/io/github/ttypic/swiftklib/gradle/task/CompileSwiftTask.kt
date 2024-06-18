@@ -31,10 +31,6 @@ open class CompileSwiftTask @Inject constructor(
             return project.buildDir.resolve("${EXTENSION_NAME}/$cinteropName/$compileTarget")
         }
 
-    @get:OutputDirectory
-    val swiftBuildDir
-        get() = File(targetDir, "swiftBuild")
-
     @get:OutputFile
     val defFile
         get() = File(targetDir, "$cinteropName.def")
@@ -48,8 +44,6 @@ open class CompileSwiftTask @Inject constructor(
         }
         val packageName: String = packageNameProperty.get()
 
-        prepareBuildDirectory()
-        createPackageSwift()
         val (libPath, headerPath) = buildSwift()
 
         createDefFile(
@@ -68,49 +62,9 @@ open class CompileSwiftTask @Inject constructor(
         readXcodeMajorVersion()
     }
 
-    /**
-     * Creates build directory or cleans up if it already exists
-     * and copies Swift source files to it
-     */
-    private fun prepareBuildDirectory() {
-        val path: File = pathProperty.get()
-
-        if (swiftBuildDir.exists()) swiftBuildDir.deleteRecursively()
-
-        swiftBuildDir.mkdirs()
-        path.copyRecursively(File(swiftBuildDir, cinteropName), true)
-    }
-
-    /**
-     * Creates `Package.Swift` file for the library
-     */
-    private fun createPackageSwift() {
-        val content = """
-            // swift-tools-version:5.5
-            import PackageDescription
-
-            let package = Package(
-            	name: "$cinteropName",
-            	products: [
-            		.library(
-            			name: "$cinteropName",
-            			type: .static,
-            			targets: ["$cinteropName"])
-            	],
-            	dependencies: [],
-            	targets: [
-            		.target(
-            			name: "$cinteropName",
-            			dependencies: [],
-            			path: "$cinteropName")
-            	]
-            )
-        """.trimIndent()
-
-        File(swiftBuildDir, "Package.swift").create(content)
-    }
-
     private fun buildSwift(): SwiftBuildResult {
+        val swiftBuildDir = pathProperty.get()
+
         project.exec {
             it.executable = "xcrun"
             it.workingDir = swiftBuildDir
