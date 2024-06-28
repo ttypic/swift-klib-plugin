@@ -273,7 +273,9 @@ private data class SwiftBuildResult(
 )
 
 val SDKLESS_TARGETS = listOf(
+    CompileTarget.iosX64,
     CompileTarget.iosArm64,
+    CompileTarget.iosSimulatorArm64,
     CompileTarget.watchosArm64,
     CompileTarget.watchosX64,
     CompileTarget.watchosSimulatorArm64,
