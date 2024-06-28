@@ -7,6 +7,15 @@ plugins {
 dependencies {
     implementation(gradleApi())
     implementation(libs.plugin.kotlin)
+
+    testImplementation(gradleTestKit())
+    testImplementation(libs.test.junit.jupiter)
+    testImplementation(libs.test.kotest.assertions)
+    testRuntimeOnly(libs.test.junit.jupiter.launcher)
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform()
 }
 
 version = "0.5.1"
