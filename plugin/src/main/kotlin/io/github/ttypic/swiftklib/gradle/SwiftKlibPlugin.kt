@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 
 const val EXTENSION_NAME = "swiftklib"
 
+@Suppress("unused")
 class SwiftKlibPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         val objects: ObjectFactory = project.objects
@@ -36,12 +37,12 @@ class SwiftKlibPlugin : Plugin<Project> {
                     name,
                     target,
                     buildDir,
-                    entry.pathProperty,
-                    entry.packageNameProperty,
-                    entry.minIosProperty,
-                    entry.minMacosProperty,
-                    entry.minTvosProperty,
-                    entry.minWatchosProperty,
+                    entry.path,
+                    entry.packageName,
+                    entry.minIos,
+                    entry.minMacos,
+                    entry.minTvos,
+                    entry.minWatchos,
                 )
             }
         }

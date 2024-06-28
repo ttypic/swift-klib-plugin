@@ -1,47 +1,21 @@
 package io.github.ttypic.swiftklib.gradle
 
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import java.io.File
 import javax.inject.Inject
 
-abstract class SwiftKlibEntry @Inject constructor(val name: String) {
+abstract class SwiftKlibEntry @Inject constructor(
+    val name: String,
+    objects: ObjectFactory,
+) {
 
-    abstract val pathProperty: Property<File>
-    abstract val packageNameProperty: Property<String>
-    abstract val minIosProperty: Property<Int>
-    abstract val minMacosProperty: Property<Int>
-    abstract val minTvosProperty: Property<Int>
-    abstract val minWatchosProperty: Property<Int>
+    val path: Property<File> = objects.property(File::class.java)
+    val packageName: Property<String> = objects.property(String::class.java)
+    val minIos: Property<Int> = objects.property(Int::class.java)
+    val minMacos: Property<Int> = objects.property(Int::class.java)
+    val minTvos: Property<Int> = objects.property(Int::class.java)
+    val minWatchos: Property<Int> = objects.property(Int::class.java)
 
-    var path: File
-        get() = pathProperty.get()
-        set(value) {
-            pathProperty.set(value)
-        }
-
-    fun packageName(name: String) = packageNameProperty.set(name)
-
-    var minIos: Int
-        get() = minIosProperty.get()
-        set(value) {
-            minIosProperty.set(value)
-        }
-
-    var minMacos: Int
-        get() = minMacosProperty.get()
-        set(value) {
-            minMacosProperty.set(value)
-        }
-
-    var minTvos: Int
-        get() = minTvosProperty.get()
-        set(value) {
-            minTvosProperty.set(value)
-        }
-
-    var minWatchos: Int
-        get() = minWatchosProperty.get()
-        set(value) {
-            minWatchosProperty.set(value)
-        }
+    fun packageName(name: String) = packageName.set(name)
 }
