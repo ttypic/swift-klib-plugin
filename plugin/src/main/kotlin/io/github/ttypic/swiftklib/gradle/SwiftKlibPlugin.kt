@@ -24,7 +24,7 @@ class SwiftKlibPlugin : Plugin<Project> {
         swiftKlibEntries.all { entry ->
             val name: String = entry.name
 
-            val targetToTaskName = CompileTarget.values().associateWith {
+            val targetToTaskName = CompileTarget.entries.associateWith {
                 getTaskName(name, it)
             }
 
