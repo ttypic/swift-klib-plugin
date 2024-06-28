@@ -33,7 +33,7 @@ open class CompileSwiftTask @Inject constructor(
     @get:Internal
     internal val targetDir: File
         get() {
-            return project.buildDir.resolve("${EXTENSION_NAME}/$cinteropName/$compileTarget")
+            return project.layout.buildDirectory.file("${EXTENSION_NAME}/$cinteropName/$compileTarget").get().asFile
         }
 
     @get:OutputDirectory
@@ -96,15 +96,21 @@ open class CompileSwiftTask @Inject constructor(
         val sourceFilePathReplacements = mapOf(
             buildDir().absolutePath to pathProperty.get().absolutePath
         )
+        val extraArgs = if (xcodeVersion >= 15 && compileTarget in SDKLESS_TARGETS) {
+            additionalSysrootArgs()
+        } else {
+            emptyList()
+        }
+        val args = generateBuildArgs() + extraArgs
+
+        logger.info("-- Running swift build --")
+        logger.info("Working directory: $swiftBuildDir")
+        logger.info("xcrun ${args.joinToString(" ")}")
+
         project.exec {
             it.executable = "xcrun"
             it.workingDir = swiftBuildDir
-            val extraArgs = if (xcodeVersion >= 15 && compileTarget in SDKLESS_TARGETS) {
-                additionalSysrootArgs()
-            } else {
-                emptyList()
-            }
-            it.args = generateBuildArgs() + extraArgs
+            it.args = args
             it.standardOutput = StringReplacingOutputStream(
                 delegate = System.out,
                 replacements = sourceFilePathReplacements
@@ -115,42 +121,43 @@ open class CompileSwiftTask @Inject constructor(
             )
         }
 
+        val releaseBuildPath = File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-macosx/release")
+
         return SwiftBuildResult(
-            libPath = File(
-                swiftBuildDir,
-                ".build/${compileTarget.arch()}-apple-macosx/release/lib${cinteropName}.a"
-            ),
-            headerPath = File(
-                swiftBuildDir,
-                ".build/${compileTarget.arch()}-apple-macosx/release/$cinteropName.build/$cinteropName-Swift.h"
-            )
+            libPath = File(releaseBuildPath, "lib${cinteropName}.a"),
+            headerPath = File(releaseBuildPath, "$cinteropName.build/$cinteropName-Swift.h")
         )
     }
 
-    private fun generateBuildArgs(): List<String> = listOf(
-        "swift",
-        "build",
-        "--arch",
-        compileTarget.arch(),
-        "-c",
-        "release",
-        "-Xswiftc",
-        "-sdk",
-        "-Xswiftc",
-        readSdkPath(),
-        "-Xswiftc",
-        "-target",
-        "-Xswiftc",
-        "${compileTarget.archPrefix()}-apple-${operatingSystem(compileTarget)}.0${compileTarget.simulatorSuffix()}",
-    )
+    private fun generateBuildArgs(): List<String> {
+        val sdkPath = readSdkPath()
+        val baseArgs = "swift build --arch ${compileTarget.arch()} -c release".split(" ")
+
+        val xcrunArgs = listOf(
+            "-sdk",
+            sdkPath,
+            "-target",
+            compileTarget.asSwiftcTarget(compileTarget.operatingSystem()),
+        ).asSwiftcArgs()
+
+        return baseArgs + xcrunArgs
+    }
 
     /** Workaround for bug in toolchain where the sdk path (via `swiftc -sdk` flag) is not propagated to clang. */
-    private fun additionalSysrootArgs(): List<String> = listOf(
-        "-Xcc",
-        "-isysroot",
-        "-Xcc",
-        readSdkPath(),
-    )
+    private fun additionalSysrootArgs(): List<String> =
+        listOf(
+            "-isysroot",
+            readSdkPath(),
+        ).asCcArgs()
+
+    private fun List<String>.asSwiftcArgs() = asBuildToolArgs("swiftc")
+    private fun List<String>.asCcArgs() = asBuildToolArgs("cc")
+
+    private fun List<String>.asBuildToolArgs(tool: String): List<String> {
+        return this.flatMap {
+            listOf("-X$tool", it)
+        }
+    }
 
     private fun readSdkPath(): String {
         val stdout = ByteArrayOutputStream()
@@ -209,22 +216,41 @@ open class CompileSwiftTask @Inject constructor(
             if (xcodeVersion >= 15) compileTarget.linkerPlatformVersionName()
             else compileTarget.linkerMinOsVersionName()
 
+        val modulePath = headerPath.parentFile.absolutePath
+
+        val basicLinkerOpts = listOf(
+            "-L/usr/lib/swift",
+            "-$linkerPlatformVersion",
+            "${minOs(compileTarget)}.0",
+            "${minOs(compileTarget)}.0",
+            "-L${xcodePath}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}"
+        )
+
+        val linkerOpts = basicLinkerOpts.joinToString(" ")
+
         val content = """
             package = $packageName
             language = Objective-C
-            headers = ${headerPath.absolutePath}
+            modules = $cinteropName
 
             # md5 ${libPath.md5()}
             staticLibraries = ${libPath.name}
             libraryPaths = ${libPath.parentFile.absolutePath}
 
-            linkerOpts = -L/usr/lib/swift -$linkerPlatformVersion ${minOs(compileTarget)}.0 ${minOs(compileTarget)}.0 -L${xcodePath}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}
+            compilerOpts = -fmodules -I$modulePath
+            linkerOpts = $linkerOpts
         """.trimIndent()
+
+        logger.info("--- Generated cinterop def file for $cinteropName ---")
+        logger.info("--- cinterop def ---")
+        logger.info(content)
+        logger.info("---/ cinterop def /---")
+
         defFile.create(content)
     }
 
-    private fun operatingSystem(compileTarget: CompileTarget): String =
-        when (compileTarget) {
+    private fun CompileTarget.operatingSystem(): String =
+        when (this) {
             CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> "ios$minIos"
             CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> "watchos$minWatchos"
             CompileTarget.tvosX64, CompileTarget.tvosArm64, CompileTarget.tvosSimulatorArm64 -> "tvos$minTvos"
