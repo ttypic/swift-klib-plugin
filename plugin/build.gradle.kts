@@ -18,13 +18,14 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
-version = "0.6.2"
+version = "0.7.0-SNAPSHOT"
 group = "io.github.ttypic"
 
 kotlin {
     jvmToolchain(17)
 }
 
+@Suppress("UnstableApiUsage")
 gradlePlugin {
     website = "https://github.com/ttypic/swift-klib-plugin"
     vcsUrl = "https://github.com/ttypic/swift-klib-plugin"
