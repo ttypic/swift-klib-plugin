@@ -238,9 +238,9 @@ abstract class CompileSwiftTask @Inject constructor(
 
             # md5 ${libPath.md5()}
             staticLibraries = ${libPath.name}
-            libraryPaths = ${libPath.parentFile.absolutePath}
+            libraryPaths = "${libPath.parentFile.absolutePath}"
 
-            compilerOpts = -fmodules -I$modulePath
+            compilerOpts = -fmodules -I"$modulePath"
             linkerOpts = $linkerOpts
         """.trimIndent()
 

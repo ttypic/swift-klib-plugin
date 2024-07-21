@@ -56,7 +56,7 @@ class SwiftKlibPlugin : Plugin<Project> {
             val task = tasks.withType(CompileSwiftTask::class.java).findByName(taskName)
                 ?: return@configureEach
 
-            cinterop.settings.defFile = task.defFile
+            cinterop.settings.definitionFile.set(task.defFile)
             cinterop.dependsOn(task)
         }
     }
