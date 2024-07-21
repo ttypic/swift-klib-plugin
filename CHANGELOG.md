@@ -1,10 +1,22 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/ttypic/swift-klib-plugin/tree/HEAD)
+
+## 0.6.0 2024-07-21
+
+[Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.5.1...v0.6.0)
+
+**Merged pull requests:**
+
+- Use Clang modules in cinterop instead of headers. [\#32](https://github.com/ttypic/swift-klib-plugin/pull/32)
+- Prettify swift build output [\#29](https://github.com/ttypic/swift-klib-plugin/pull/29)
+- Upgrade Gradle and dependencies. Migrate to version
+  catalog. [\#31](https://github.com/ttypic/swift-klib-plugin/pull/31)
 
 ## 0.5.1 2023-11-24
 
@@ -20,8 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Merged pull requests:**
 
-- Support Xcode being installed in a non-default path [\#17](https://github.com/ttypic/swift-klib-plugin/pull/17) ([hartbit](https://github.com/hartbit))
-- fix: use platformVersion instead of min*Version linker flag for xcode 15 [\#19](https://github.com/ttypic/swift-klib-plugin/pull/19)
+- Support Xcode being installed in a non-default
+  path [\#17](https://github.com/ttypic/swift-klib-plugin/pull/17) ([hartbit](https://github.com/hartbit))
+- fix: use platformVersion instead of min*Version linker flag for xcode
+  15 [\#19](https://github.com/ttypic/swift-klib-plugin/pull/19)
 
 ## 0.4.0 2023-10-08
 
@@ -33,7 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Merged pull requests:**
 
-- Workaround for wrong SDK in build process for Xcode15 [\#13](https://github.com/ttypic/swift-klib-plugin/pull/13) ([davidtaylor-juul](https://github.com/davidtaylor-juul))
+- Workaround for wrong SDK in build process for
+  Xcode15 [\#13](https://github.com/ttypic/swift-klib-plugin/pull/13) ([davidtaylor-juul](https://github.com/davidtaylor-juul))
 
 ## 0.3.0 2023-06-25
 

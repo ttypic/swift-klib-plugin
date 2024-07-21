@@ -24,10 +24,10 @@ jobs:
                   check-latest: true
 
             - name: Publish Release
-              run: >
-                ./gradlew --stacktrace :plugin:publishPlugins
-                  -Pgradle.publish.key=${{ secrets.GRADLE_PUBLISH_KEY }}
-                  -Pgradle.publish.secret=${{ secrets.GRADLE_PUBLISH_SECRET }}
+              run: ./gradlew --stacktrace :plugin:publishPlugins
+              env:
+                  GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
+                  GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
 
             - name: Extract release notes
               id: release_notes
