@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/ttypic/swift-klib-plugin/tree/HEAD)
 
-## 0.6.2 2024-07-21
+## [0.6.2] - 2024-07-21
 
 [Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.5.1...v0.6.2)
 
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade Gradle and dependencies. Migrate to version
   catalog. [\#31](https://github.com/ttypic/swift-klib-plugin/pull/31)
 
-## 0.5.1 2023-11-24
+## [0.5.1] - 2023-11-24
 
 [Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.5.0...v0.5.1)
 
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - fix: more robust readXcodeMajorVersion [\#20](https://github.com/ttypic/swift-klib-plugin/pull/20)
 
-## 0.5.0 2023-11-16
+## [0.5.0] - 2023-11-16
 
 [Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.4.0...v0.5.0)
 
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix: use platformVersion instead of min*Version linker flag for xcode
   15 [\#19](https://github.com/ttypic/swift-klib-plugin/pull/19)
 
-## 0.4.0 2023-10-08
+## [0.4.0] - 2023-10-08
 
 [Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.3.0...v0.4.0)
 
@@ -50,23 +50,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workaround for wrong SDK in build process for
   Xcode15 [\#13](https://github.com/ttypic/swift-klib-plugin/pull/13) ([davidtaylor-juul](https://github.com/davidtaylor-juul))
 
-## 0.3.0 2023-06-25
+## [0.3.0] - 2023-06-25
 
 * Add tvOS, watchOS, macOS targets
 
-## 0.2.1 2023-03-05
+## [0.2.1] - 2023-03-05
 
 * Compile with Java 8 toolchain
 
-## 0.2.0 2023-02-26
+## [0.2.0] - 2023-02-26
 
 * **Fix:** add step to clean old build files in build directory
 * Light refactoring of source code
 
-## 0.1.0 2023-02-08
+## [0.1.0] - 2023-02-08
 
 * Invalidate cinterop task if source Swift-files have changed
 
-## 0.0.1 2022-12-27
+## [0.0.1] - 2022-12-27
 
 * Initial release
