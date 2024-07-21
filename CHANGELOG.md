@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/ttypic/swift-klib-plugin/tree/HEAD)
 
+## [0.6.3] - 2024-07-21
+
+- Fix build issues when project path has spaces [\#26](https://github.com/ttypic/swift-klib-plugin/issues/26)
+
 ## [0.6.2] - 2024-07-21
 
 [Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.5.1...v0.6.2)
