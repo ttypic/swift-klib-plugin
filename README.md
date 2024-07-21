@@ -22,7 +22,7 @@ Using the [plugins DSL](https://docs.gradle.org/current/userguide/plugins.html#s
 
 ```kotlin
 plugins {
-    id("io.github.ttypic.swiftklib") version "0.6.0"
+    id("io.github.ttypic.swiftklib") version "0.6.1"
 }
 ```
 
@@ -36,7 +36,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath("io.github.ttypic:plugin:0.6.0")
+    classpath("io.github.ttypic:plugin:0.6.1")
   }
 }
 

@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/ttypic/swift-klib-plugin/tree/HEAD)
 
-## 0.6.0 2024-07-21
+## 0.6.1 2024-07-21
 
-[Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.5.1...v0.6.0)
+[Full Changelog](https://github.com/ttypic/swift-klib-plugin/compare/v0.5.1...v0.6.1)
 
 **Merged pull requests:**
 
