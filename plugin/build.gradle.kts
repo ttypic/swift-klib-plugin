@@ -18,7 +18,7 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
-version = "0.6.1"
+version = "0.6.2"
 group = "io.github.ttypic"
 
 kotlin {
