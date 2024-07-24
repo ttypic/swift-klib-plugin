@@ -100,7 +100,8 @@ swiftklib {
 
 ### Examples
 
-More samples can be found in the [examples/](https://github.com/ttypic/swift-klib-plugin/tree/main/examples) folder.
+- More samples can be found in the [examples/](https://github.com/ttypic/swift-klib-plugin/tree/main/examples) folder.
+- Component demonstrating a multipurpose Kotlin Multiplatform and Swift Package audio player: [radioplayer-kt](https://github.com/markst/radioplayer-kt)
 
 ## License
 
