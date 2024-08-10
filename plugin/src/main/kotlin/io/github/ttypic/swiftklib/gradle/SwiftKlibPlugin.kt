@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
+import org.jetbrains.kotlin.konan.target.HostManager
 
 const val EXTENSION_NAME = "swiftklib"
 
@@ -21,6 +22,11 @@ class SwiftKlibPlugin : Plugin<Project> {
             }
 
         project.extensions.add(EXTENSION_NAME, swiftKlibEntries)
+
+        if (!HostManager.hostIsMac) {
+            logger.warn("Current host OS is not macOS. Disabling SwiftKlib plugin")
+            return
+        }
 
         swiftKlibEntries.all { entry ->
             val name: String = entry.name
