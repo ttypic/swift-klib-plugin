@@ -104,7 +104,8 @@ abstract class CompileSwiftTask @Inject constructor(
         } else {
             emptyList()
         }
-        val args = generateBuildArgs() + extraArgs
+        val sdkForXcRun = listOf("--sdk", "macosx")
+        val args = sdkForXcRun + generateBuildArgs() + extraArgs
 
         logger.info("-- Running swift build --")
         logger.info("Working directory: $swiftBuildDir")
