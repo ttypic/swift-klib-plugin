@@ -2,13 +2,16 @@ package io.github.ttypic.swiftklib.gradle.task
 
 import io.github.ttypic.swiftklib.gradle.CompileTarget
 import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
+import io.github.ttypic.swiftklib.gradle.SwiftPackageDependency
 import io.github.ttypic.swiftklib.gradle.templates.createPackageSwiftContents
 import io.github.ttypic.swiftklib.gradle.util.StringReplacingOutputStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
@@ -21,6 +24,7 @@ import java.security.MessageDigest
 import javax.inject.Inject
 
 abstract class CompileSwiftTask @Inject constructor(
+    @Input val printDebug: Boolean,
     @Input val cinteropName: String,
     @Input val compileTarget: CompileTarget,
     @Input val buildDirectory: String,
@@ -31,6 +35,10 @@ abstract class CompileSwiftTask @Inject constructor(
     @Optional @Input val minTvosProperty: Property<Int>,
     @Optional @Input val minWatchosProperty: Property<Int>,
 ) : DefaultTask() {
+
+    @get:Optional
+    @get:Nested
+    internal abstract var dependenciesProperty: ListProperty<SwiftPackageDependency>
 
     @get:Internal
     internal val targetDir: File
@@ -52,9 +60,16 @@ abstract class CompileSwiftTask @Inject constructor(
     @TaskAction
     fun produce() {
         val packageName: String = packageNameProperty.get()
+        val dependencies = dependenciesProperty.getOrElse(emptyList())
 
         prepareBuildDirectory()
-        createPackageSwift()
+        createPackageSwift(dependencies)
+
+        // Only resolve if we have dependencies
+        if (dependencies.isNotEmpty()) {
+            resolveSwiftPackages()
+        }
+
         val xcodeMajorVersion = readXcodeMajorVersion()
         val (libPath, headerPath) = buildSwift(xcodeMajorVersion)
 
@@ -87,12 +102,30 @@ abstract class CompileSwiftTask @Inject constructor(
     private fun buildDir() =
         File(swiftBuildDir, cinteropName)
 
-    /**
-     * Creates `Package.Swift` file for the library
-     */
-    private fun createPackageSwift() {
+    private fun resolveSwiftPackages() {
+        logger.info("Resolving Swift Package dependencies...")
+
+        val result = execOperations.exec {
+            it.executable = "xcrun"
+            it.workingDir = swiftBuildDir
+            it.args = listOf("swift", "package", "resolve")
+            it.isIgnoreExitValue = true
+        }
+
+        if (result.exitValue != 0) {
+            throw RuntimeException("Failed to resolve Swift Package dependencies")
+        }
+    }
+
+    private fun createPackageSwift(dependencies: List<SwiftPackageDependency>) {
+        val packageSwiftContents = createPackageSwiftContents(cinteropName, dependencies)
+        if (printDebug) {
+            logger.warn("========   Package.swift contents   ========")
+            logger.warn(packageSwiftContents)
+            logger.warn("======== | Package.swift contents | ========")
+        }
         File(swiftBuildDir, "Package.swift")
-            .writeText(createPackageSwiftContents(cinteropName))
+            .writeText(packageSwiftContents)
     }
 
     private fun buildSwift(xcodeVersion: Int): SwiftBuildResult {

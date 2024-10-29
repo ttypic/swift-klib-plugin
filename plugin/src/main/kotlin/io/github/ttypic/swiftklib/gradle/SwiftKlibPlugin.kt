@@ -40,6 +40,7 @@ class SwiftKlibPlugin : Plugin<Project> {
                 tasks.register(
                     taskName,
                     CompileSwiftTask::class.java,
+                    project.hasProperty("swiftklibDebug"),
                     name,
                     target,
                     buildDir,
@@ -49,7 +50,9 @@ class SwiftKlibPlugin : Plugin<Project> {
                     entry.minMacos,
                     entry.minTvos,
                     entry.minWatchos,
-                )
+                ).configure {
+                    it.dependenciesProperty = entry.dependencies
+                }
             }
         }
 

@@ -1,0 +1,53 @@
+package io.github.ttypic.swiftklib.gradle
+
+import com.autonomousapps.kit.GradleBuilder.build
+import com.autonomousapps.kit.truth.TestKitTruth.Companion.assertThat
+import io.github.ttypic.swiftklib.gradle.fixture.CInteropFixture
+import io.github.ttypic.swiftklib.gradle.fixture.KotlinSource
+import io.github.ttypic.swiftklib.gradle.fixture.SwiftSource
+import org.junit.jupiter.api.Test
+
+class CinteropModulesTest {
+
+    @Test
+    fun `build with imported UIKit framework is successful`() {
+        assumeMacos()
+
+        // Given
+        val fixture = CInteropFixture(
+            swiftSource = SwiftSource.of(
+                content = """
+                import UIKit
+                @objc public class TestView: UIView {}
+            """.trimIndent()
+            ),
+            kotlinSource = KotlinSource.of(
+                content = """
+                package test
+                import test.TestView
+                val view = TestView()
+            """.trimIndent()
+            )
+        )
+
+        // When
+        val result = build(fixture.gradleProject.rootDir, "build")
+
+        // Then
+        assertThat(result).task(":library:build").succeeded()
+    }
+
+    @Test
+    fun `build on linux results in warning about unsupported OS`() {
+        assumeLinux()
+
+        // Given
+        val fixture = CInteropFixture()
+
+        // When
+        val result = build(fixture.gradleProject.rootDir, "build")
+
+        // Then
+        assertThat(result).output().contains("Current host OS is not macOS. Disabling SwiftKlib plugin")
+    }
+}
