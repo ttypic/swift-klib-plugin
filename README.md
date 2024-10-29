@@ -42,6 +42,12 @@ buildscript {
 
 apply(plugin = "io.github.ttypic.swiftklib")
 ```
+Add this to the project-level gradle.properties file (if it’s not already included).
+```properties
+#Kotlin Multiplatform
+kotlin.mpp.enableCInteropCommonization=true
+
+```
 
 ## Usage
 
