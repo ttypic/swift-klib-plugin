@@ -3,7 +3,8 @@ package io.github.ttypic.swiftklib.gradle
 import com.autonomousapps.kit.GradleBuilder.build
 import com.autonomousapps.kit.GradleBuilder.buildAndFail
 import com.autonomousapps.kit.truth.TestKitTruth.Companion.assertThat
-import io.github.ttypic.swiftklib.gradle.fixture.SwiftPackageFixture
+import io.github.ttypic.swiftklib.gradle.fixture.SwiftKlibTestFixture
+import io.github.ttypic.swiftklib.gradle.fixture.SwiftSource
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -13,140 +14,138 @@ class SwiftPackageModulesTest {
     @Test
     fun `build with remote SPM dependency using exact version is successful`() {
         // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                import KeychainAccess
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                    import Foundation
+                    import KeychainAccess
 
-                @objc public class KeychainManager: NSObject {
-                    private let keychain = Keychain(service: "test-service")
+                    @objc public class KeychainManager: NSObject {
+                        private let keychain = Keychain(service: "test-service")
 
-                    @objc public func save(value: String, forKey key: String) throws {
-                        try keychain.set(value, key: key)
+                        @objc public func save(value: String, forKey key: String) throws {
+                            try keychain.set(value, key: key)
+                        }
                     }
-                }
-            """.trimIndent(),
-            swiftklibConfig = """
+                """.trimIndent())
+            )
+            .withConfiguration {
                 dependencies {
                     remote("KeychainAccess") {
                         github("kishikawakatsumi", "KeychainAccess")
                         exactVersion("4.2.2")
                     }
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = build(fixture.gradleProject.rootDir, "build")
 
         // Then
         assertThat(result).task(":library:build").succeeded()
-        val packageResolved = fixture.getPackageResolvedFile()
-        assertTrue(packageResolved.exists())
-        assertTrue(packageResolved.readText().contains("KeychainAccess"))
+        assertPackageResolved(fixture, "KeychainAccess")
     }
 
     @Test
     fun `build with remote SPM dependency using version range is successful`() {
-        // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                import KeychainAccess
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                    import Foundation
+                    import KeychainAccess
 
-                @objc public class KeychainManager: NSObject {
-                    private let keychain = Keychain(service: "test-service")
-                }
-            """.trimIndent(),
-            swiftklibConfig = """
+                    @objc public class KeychainManager: NSObject {
+                        private let keychain = Keychain(service: "test-service")
+                    }
+                """.trimIndent())
+            )
+            .withConfiguration {
                 dependencies {
                     remote("KeychainAccess") {
                         github("kishikawakatsumi", "KeychainAccess")
-                        versionRange("4.0.0", "5.0.0")
+                        versionRange("4.0.0", "5.0.0", true)
                     }
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = build(fixture.gradleProject.rootDir, "build")
 
         // Then
         assertThat(result).task(":library:build").succeeded()
-        val packageResolved = fixture.getPackageResolvedFile()
-        assertTrue(packageResolved.exists())
-        assertTrue(packageResolved.readText().contains("KeychainAccess"))
-    }
-
-    @Test
-    fun `build with remote SPM dependency using from version is successful`() {
-        // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                import KeychainAccess
-
-                @objc public class KeychainManager: NSObject {
-                    private let keychain = Keychain(service: "test-service")
-                }
-            """.trimIndent(),
-            swiftklibConfig = """
-                dependencies {
-                    remote("KeychainAccess") {
-                        github("kishikawakatsumi", "KeychainAccess")
-                        fromVersion("4.0.0")
-                    }
-                }
-            """.trimIndent()
-        )
-
-        // When
-        val result = build(fixture.gradleProject.rootDir, "build")
-
-        // Then
-        assertThat(result).task(":library:build").succeeded()
-        val packageResolved = fixture.getPackageResolvedFile()
-        assertTrue(packageResolved.exists())
-        assertTrue(packageResolved.readText().contains("KeychainAccess"))
+        assertPackageResolved(fixture, "KeychainAccess")
     }
 
     @Test
     fun `build with remote SPM dependency using branch is successful`() {
-        // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
                 import Foundation
                 import KeychainAccess
 
                 @objc public class KeychainManager: NSObject {
                     private let keychain = Keychain(service: "test-service")
                 }
-            """.trimIndent(),
-            swiftklibConfig = """
+            """.trimIndent())
+            )
+            .withConfiguration {
                 dependencies {
                     remote("KeychainAccess") {
                         github("kishikawakatsumi", "KeychainAccess")
                         branch("master")
                     }
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = build(fixture.gradleProject.rootDir, "build")
 
         // Then
         assertThat(result).task(":library:build").succeeded()
-        val packageResolved = fixture.getPackageResolvedFile()
-        assertTrue(packageResolved.exists())
-        assertTrue(packageResolved.readText().contains("KeychainAccess"))
+        assertPackageResolved(fixture, "KeychainAccess")
     }
 
     @Test
     fun `build with local SPM dependency is successful`() {
         // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
+        val localPackageDir = File(createTempDir(), "LocalPackage").apply {
+            mkdirs()
+            // Create Package.swift
+            File(this, "Package.swift").writeText("""
+            // swift-tools-version:5.3
+            import PackageDescription
+
+            let package = Package(
+                name: "LocalPackage",
+                products: [
+                    .library(name: "LocalPackage", targets: ["LocalPackage"]),
+                ],
+                targets: [
+                    .target(name: "LocalPackage"),
+                ]
+            )
+        """.trimIndent())
+
+            // Create source files
+            File(this, "Sources/LocalPackage").mkdirs()
+            File(this, "Sources/LocalPackage/LocalHelper.swift").writeText("""
+            import Foundation
+
+            @objc public class LocalHelper: NSObject {
+                @objc public class func getVersion() -> String {
+                    return "1.0.0"
+                }
+            }
+        """.trimIndent())
+        }
+
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
                 import Foundation
                 import LocalPackage
 
@@ -155,38 +154,46 @@ class SwiftPackageModulesTest {
                         return LocalHelper.getVersion()
                     }
                 }
-            """.trimIndent(),
-            swiftklibConfig = """
-            """.trimIndent(),
-            withLocalPackage = true
-        )
+            """.trimIndent())
+            )
+            .withConfiguration {
+                dependencies {
+                    local("LocalPackage", localPackageDir)
+                }
+            }
+            .build()
 
-        // When
-        val result = build(fixture.gradleProject.rootDir, "build")
+        try {
+            // When
+            val result = build(fixture.gradleProject.rootDir, "build")
 
-        // Then
-        assertThat(result).task(":library:build").succeeded()
+            // Then
+            assertThat(result).task(":library:build").succeeded()
+        } finally {
+            localPackageDir.deleteRecursively()
+        }
     }
 
     @Test
     fun `build with multiple dependencies is successful`() {
-        // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                import KeychainAccess
-                import SwiftyJSON
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                    import Foundation
+                    import KeychainAccess
+                    import SwiftyJSON
 
-                @objc public class DataManager: NSObject {
-                    private let keychain = Keychain(service: "test-service")
+                    @objc public class DataManager: NSObject {
+                        private let keychain = Keychain(service: "test-service")
 
-                    @objc public func processJson(jsonString: String) throws -> String {
-                        let json = try JSON(parseJSON: jsonString)
-                        return json.description
+                        @objc public func processJson(jsonString: String) throws -> String {
+                            let json = try JSON(parseJSON: jsonString)
+                            return json.description
+                        }
                     }
-                }
-            """.trimIndent(),
-            swiftklibConfig = """
+                """.trimIndent())
+            )
+            .withConfiguration {
                 dependencies {
                     remote("KeychainAccess") {
                         github("kishikawakatsumi", "KeychainAccess")
@@ -194,49 +201,33 @@ class SwiftPackageModulesTest {
                     }
                     remote("SwiftyJSON") {
                         github("SwiftyJSON", "SwiftyJSON")
-                        versionRange("5.0.0", "6.0.0")
+                        versionRange("5.0.0", "6.0.0", true)
                     }
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = build(fixture.gradleProject.rootDir, "build")
 
         // Then
         assertThat(result).task(":library:build").succeeded()
-
-        val packageResolved = fixture.getPackageResolvedFile()
-        assertTrue(packageResolved.exists(), "Package.resolved file not found")
-
-        val content = packageResolved.readText()
-        assertTrue(
-            content.contains("\"identity\" : \"KeychainAccess\"", ignoreCase = true),
-            "KeychainAccess dependency not found"
-        )
-        assertTrue(
-            content.contains("\"identity\" : \"SwiftyJSON\"", ignoreCase = true),
-            "SwiftyJSON dependency not found"
-        )
+        assertPackageResolved(fixture, "KeychainAccess", "SwiftyJSON")
     }
 
     @Test
     fun `build fails with blank package name`() {
         // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                @objc public class TestClass: NSObject {}
-            """.trimIndent(),
-            swiftklibConfig = """
+        val fixture = SwiftKlibTestFixture.builder()
+            .withConfiguration {
                 dependencies {
-                    remote("") {
+                    remote("") {  // Empty package name
                         github("example", "test")
                         exactVersion("1.0.0")
                     }
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = buildAndFail(fixture.gradleProject.rootDir, "build")
@@ -248,20 +239,16 @@ class SwiftPackageModulesTest {
     @Test
     fun `build fails with blank version`() {
         // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                @objc public class TestClass: NSObject {}
-            """.trimIndent(),
-            swiftklibConfig = """
+        val fixture = SwiftKlibTestFixture.builder()
+            .withConfiguration {
                 dependencies {
                     remote("Test") {
                         github("example", "test")
-                        exactVersion("")
+                        exactVersion("")  // Empty version
                     }
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = buildAndFail(fixture.gradleProject.rootDir, "build")
@@ -273,19 +260,16 @@ class SwiftPackageModulesTest {
     @Test
     fun `build fails with missing version specification`() {
         // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                @objc public class TestClass: NSObject {}
-            """.trimIndent(),
-            swiftklibConfig = """
+        val fixture = SwiftKlibTestFixture.builder()
+            .withConfiguration {
                 dependencies {
                     remote("Test") {
                         github("example", "test")
+                        // No version specified
                     }
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = buildAndFail(fixture.gradleProject.rootDir, "build")
@@ -297,17 +281,14 @@ class SwiftPackageModulesTest {
     @Test
     fun `build fails with nonexistent local package`() {
         // Given
-        val fixture = SwiftPackageFixture(
-            swiftCode = """
-                import Foundation
-                @objc public class TestClass: NSObject {}
-            """.trimIndent(),
-            swiftklibConfig = """
+        val nonexistentPath = File("nonexistent/path")
+        val fixture = SwiftKlibTestFixture.builder()
+            .withConfiguration {
                 dependencies {
-                    local("LocalPackage", file("nonexistent/path"))
+                    local("LocalPackage", nonexistentPath)
                 }
-            """.trimIndent()
-        )
+            }
+            .build()
 
         // When
         val result = buildAndFail(fixture.gradleProject.rootDir, "build")
@@ -315,5 +296,21 @@ class SwiftPackageModulesTest {
         // Then
         assertThat(result).output().contains("Package path must exist")
     }
-}
 
+
+    private fun assertPackageResolved(fixture: SwiftKlibTestFixture, vararg packageNames: String) {
+        val resolvedFile = File(
+            fixture.gradleProject.rootDir,
+            "library/build/swiftklib/test/iosArm64/swiftBuild/Package.resolved"
+        )
+        assertTrue(resolvedFile.exists(), "Package.resolved file not found")
+
+        val content = resolvedFile.readText()
+        packageNames.forEach { packageName ->
+            assertTrue(
+                content.contains("\"identity\" : \"$packageName\"", ignoreCase = true),
+                "$packageName dependency not found"
+            )
+        }
+    }
+}

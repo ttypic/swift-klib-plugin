@@ -11,6 +11,7 @@ dependencies {
 
     functionalTestImplementation(libs.test.junit.jupiter)
     functionalTestImplementation(libs.test.kotest.assertions)
+    functionalTestImplementation(project(":plugin"))
     functionalTestRuntimeOnly(libs.test.junit.jupiter.launcher)
 }
 

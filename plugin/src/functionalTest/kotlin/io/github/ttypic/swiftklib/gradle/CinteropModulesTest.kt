@@ -2,8 +2,8 @@ package io.github.ttypic.swiftklib.gradle
 
 import com.autonomousapps.kit.GradleBuilder.build
 import com.autonomousapps.kit.truth.TestKitTruth.Companion.assertThat
-import io.github.ttypic.swiftklib.gradle.fixture.CInteropFixture
 import io.github.ttypic.swiftklib.gradle.fixture.KotlinSource
+import io.github.ttypic.swiftklib.gradle.fixture.SwiftKlibTestFixture
 import io.github.ttypic.swiftklib.gradle.fixture.SwiftSource
 import org.junit.jupiter.api.Test
 
@@ -14,21 +14,25 @@ class CinteropModulesTest {
         assumeMacos()
 
         // Given
-        val fixture = CInteropFixture(
-            swiftSource = SwiftSource.of(
-                content = """
-                import UIKit
-                @objc public class TestView: UIView {}
-            """.trimIndent()
-            ),
-            kotlinSource = KotlinSource.of(
-                content = """
-                package test
-                import test.TestView
-                val view = TestView()
-            """.trimIndent()
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(
+                    content = """
+                    import UIKit
+                    @objc public class TestView: UIView {}
+                    """.trimIndent()
+                )
             )
-        )
+            .withKotlinSources(
+                KotlinSource.of(
+                    content = """
+                    package test
+                    import test.TestView
+                    val view = TestView()
+                    """.trimIndent()
+                )
+            )
+            .build()
 
         // When
         val result = build(fixture.gradleProject.rootDir, "build")
@@ -42,7 +46,16 @@ class CinteropModulesTest {
         assumeLinux()
 
         // Given
-        val fixture = CInteropFixture()
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(
+                    content = """
+                    import Foundation
+                    @objc public class TestClass: NSObject {}
+                    """.trimIndent()
+                )
+            )
+            .build()
 
         // When
         val result = build(fixture.gradleProject.rootDir, "build")
