@@ -20,7 +20,6 @@ import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.math.BigInteger
-import java.nio.file.Path
 import java.security.MessageDigest
 import javax.inject.Inject
 
@@ -141,19 +140,31 @@ abstract class CompileSwiftTask @Inject constructor(
 
         dependencies.forEach { dependency ->
             if (dependency is SwiftPackageDependency.Local) {
-                addLocalPackage(dependency.path.absolutePath)
+                addDependencyBlockIfNeeded(cinteropName)
+                val escapePath = dependency.path.absolutePath.replace("/", "\\/")
+                execOperations.exec {
+                    it.executable = "sed"
+                    it.workingDir = swiftBuildDir
+                    it.args = listOf(
+                        "-i",
+                        "''",
+                        "/dependencies: \\[/,/]/ s/]/    \\n\\t.package(path: \"${escapePath}\"),\\n]/",
+                        "Package.swift"
+                    )
+                    it.isIgnoreExitValue = true
+                }
             } else {
                 execOperations.exec {
                     it.executable = "swift"
                     it.workingDir = swiftBuildDir
                     it.args = listOf("package", "add-dependency") + dependency.toSwiftArgs()
                     it.isIgnoreExitValue = true
-                }.run {
-                    if (exitValue != 0) {
-                        throw RuntimeException(
-                            "Failed to add Swift Package dependency $dependency",
-                        )
-                    }
+                }
+            }.run {
+                if (exitValue != 0) {
+                    throw RuntimeException(
+                        "Failed to add Swift Package dependency $dependency",
+                    )
                 }
             }
         }
@@ -224,12 +235,11 @@ abstract class CompileSwiftTask @Inject constructor(
         }
     }
 
-    private fun addLocalPackage(path: String) {
-        File(swiftBuildDir, "Package.swift").readText().let {
-            val content = if (!it.contains("dependencies:")) {
-                it.replace("name: \"cinteropName\",", "name: \"cinteropName\", dependencies:[],")
-            } else {
-
+    private fun addDependencyBlockIfNeeded(name: String) {
+        File(swiftBuildDir, "Package.swift").readText().run {
+            if (!contains("dependencies:")) {
+                val updated = replace("name: \"$name\"", "name: \"$name\",\n\tdependencies: []")
+                File(swiftBuildDir, "Package.swift").writeText(updated)
             }
         }
     }
