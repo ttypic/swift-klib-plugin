@@ -232,14 +232,17 @@ private class TestSwiftPackageConfigurationImpl : SwiftPackageConfiguration {
 private class TestRemotePackageConfigurationImpl(private val name: String) : RemotePackageConfiguration {
 
     private var url: String? = null
+    private var packageName: String? = null
     private var versionConfig: TestVersionConfig? = null
 
-    override fun github(owner: String, repo: String) {
+    override fun github(owner: String, repo: String, packageName: String?) {
         url = "https://github.com/$owner/$repo.git"
+        this.packageName = packageName
     }
 
-    override fun url(url: String) {
+    override fun url(url: String, packageName: String?) {
         this.url = url
+        this.packageName = name
     }
 
     override fun exactVersion(version: String) {

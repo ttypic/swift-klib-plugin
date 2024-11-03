@@ -3,7 +3,7 @@ package io.github.ttypic.swiftklib.gradle.task
 import io.github.ttypic.swiftklib.gradle.CompileTarget
 import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
 import io.github.ttypic.swiftklib.gradle.SwiftPackageDependency
-import io.github.ttypic.swiftklib.gradle.templates.createPackageSwiftContents
+import io.github.ttypic.swiftklib.gradle.templates.toSwiftArgs
 import io.github.ttypic.swiftklib.gradle.util.StringReplacingOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.ListProperty
@@ -20,6 +20,7 @@ import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.math.BigInteger
+import java.nio.file.Path
 import java.security.MessageDigest
 import javax.inject.Inject
 
@@ -118,14 +119,119 @@ abstract class CompileSwiftTask @Inject constructor(
     }
 
     private fun createPackageSwift(dependencies: List<SwiftPackageDependency>) {
-        val packageSwiftContents = createPackageSwiftContents(cinteropName, dependencies)
+        execOperations.exec {
+            it.executable = "swift"
+            it.workingDir = swiftBuildDir
+            it.isIgnoreExitValue = true
+            it.args = listOf(
+                "package",
+                "init",
+                "--name",
+                cinteropName,
+                "--type",
+                "empty",
+                "--disable-xctest",
+                "--disable-swift-testing"
+            )
+        }.run {
+            if (exitValue != 0) {
+                throw RuntimeException("Failed to init Swift Package")
+            }
+        }
+
+        dependencies.forEach { dependency ->
+            if (dependency is SwiftPackageDependency.Local) {
+                addLocalPackage(dependency.path.absolutePath)
+            } else {
+                execOperations.exec {
+                    it.executable = "swift"
+                    it.workingDir = swiftBuildDir
+                    it.args = listOf("package", "add-dependency") + dependency.toSwiftArgs()
+                    it.isIgnoreExitValue = true
+                }.run {
+                    if (exitValue != 0) {
+                        throw RuntimeException(
+                            "Failed to add Swift Package dependency $dependency",
+                        )
+                    }
+                }
+            }
+        }
+
+        execOperations.exec {
+            it.executable = "swift"
+            it.workingDir = swiftBuildDir
+            it.args = listOf(
+                "package",
+                "add-target",
+                "--path",
+                cinteropName,
+                cinteropName
+            )
+            it.isIgnoreExitValue = true
+        }.run {
+            if (exitValue != 0) {
+                throw RuntimeException("Failed to add Swift Package target $cinteropName")
+            }
+        }
+
+        dependencies.forEach { dependency ->
+            execOperations.exec {
+                it.executable = "swift"
+                it.workingDir = swiftBuildDir
+                it.isIgnoreExitValue = true
+                it.args = listOf(
+                    "package",
+                    "add-target-dependency",
+                    dependency.name,
+                    "--package",
+                    dependency.packageName ?: dependency.name,
+                    cinteropName,
+                )
+            }.run {
+                if (exitValue != 0) {
+                    throw RuntimeException(
+                        "Failed to add Swift Package target dependency $cinteropName - package = ${dependency.name}",
+                    )
+                }
+            }
+        }
+
+        execOperations.exec {
+            it.executable = "swift"
+            it.workingDir = swiftBuildDir
+            it.isIgnoreExitValue = true
+            it.args = listOf(
+                "package",
+                "add-product",
+                "--targets",
+                cinteropName,
+                "--type",
+                "static-library",
+                cinteropName
+            )
+        }.run {
+            if (exitValue != 0) {
+                throw RuntimeException(
+                    "Failed to add Swift Package library $cinteropName",
+                )
+            }
+        }
         if (printDebug) {
             logger.warn("========   Package.swift contents   ========")
-            logger.warn(packageSwiftContents)
+            logger.warn(File(swiftBuildDir, "Package.swift").readText())
             logger.warn("======== | Package.swift contents | ========")
         }
-        File(swiftBuildDir, "Package.swift")
-            .writeText(packageSwiftContents)
+    }
+
+    private fun addLocalPackage(path: String) {
+        File(swiftBuildDir, "Package.swift").readText().let {
+            val content = if (!it.contains("dependencies:")) {
+                it.replace("name: \"cinteropName\",", "name: \"cinteropName\", dependencies:[],")
+            } else {
+
+            }
+        }
     }
 
     private fun buildSwift(xcodeVersion: Int): SwiftBuildResult {
@@ -157,7 +263,8 @@ abstract class CompileSwiftTask @Inject constructor(
             )
         }
 
-        val releaseBuildPath = File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-macosx/release")
+        val releaseBuildPath =
+            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-macosx/release")
 
         return SwiftBuildResult(
             libPath = File(releaseBuildPath, "lib${cinteropName}.a"),
@@ -245,7 +352,12 @@ abstract class CompileSwiftTask @Inject constructor(
      * Note: adds lib-file md5 hash to library in order to automatically
      * invalidate connected cinterop task
      */
-    private fun createDefFile(libPath: File, headerPath: File, packageName: String, xcodeVersion: Int) {
+    private fun createDefFile(
+        libPath: File,
+        headerPath: File,
+        packageName: String,
+        xcodeVersion: Int
+    ) {
         val xcodePath = readXcodePath()
 
         val linkerPlatformVersion =
