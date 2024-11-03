@@ -4,13 +4,15 @@ package io.github.ttypic.swiftklib.gradle.api
 interface RemotePackageConfiguration {
     /**
      * Sets GitHub repository as the package source.
+     * Specifies the main package name in case of multi target package (ex: Firebase)
      */
-    fun github(owner: String, repo: String)
+    fun github(owner: String, repo: String, packageName: String? = null)
 
     /**
      * Sets custom URL as the package source.
+     * Specifies the main package name in case of multi target package (ex: Firebase)
      */
-    fun url(url: String)
+    fun url(url: String, packageName: String? = null)
 
     /**
      * Specifies exact version of the package.

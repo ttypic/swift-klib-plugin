@@ -2,16 +2,20 @@ package io.github.ttypic.swiftklib.gradle
 
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import java.io.File
 import java.io.Serializable
 
 internal sealed interface SwiftPackageDependency : Serializable {
     @get:Input
     val name: String
+    @get:Input @get:Optional
+    val packageName: String?
 
     data class Local(
         @Input override val name: String,
-        @InputDirectory val path: File
+        @InputDirectory val path: File,
+        @Input @get:Optional override val packageName: String? = null,
     ) : SwiftPackageDependency {
         init {
             require(name.isNotBlank()) { "Package name cannot be blank" }
@@ -26,7 +30,8 @@ internal sealed interface SwiftPackageDependency : Serializable {
         data class ExactVersion(
             @Input override val name: String,
             @Input override val url: String,
-            @Input val version: String
+            @Input val version: String,
+            @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
                 require(name.isNotBlank()) { "Package name cannot be blank" }
@@ -40,7 +45,8 @@ internal sealed interface SwiftPackageDependency : Serializable {
             @Input override val url: String,
             @Input val from: String,
             @Input val to: String,
-            @Input val inclusive: Boolean = true
+            @Input val inclusive: Boolean = true,
+            @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
                 require(name.isNotBlank()) { "Package name cannot be blank" }
@@ -53,7 +59,8 @@ internal sealed interface SwiftPackageDependency : Serializable {
         data class Branch(
             @Input override val name: String,
             @Input override val url: String,
-            @Input val branchName: String
+            @Input val branchName: String,
+            @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
                 require(name.isNotBlank()) { "Package name cannot be blank" }
@@ -65,7 +72,8 @@ internal sealed interface SwiftPackageDependency : Serializable {
         data class FromVersion(
             @Input override val name: String,
             @Input override val url: String,
-            @Input val version: String
+            @Input val version: String,
+            @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
                 require(name.isNotBlank()) { "Package name cannot be blank" }
