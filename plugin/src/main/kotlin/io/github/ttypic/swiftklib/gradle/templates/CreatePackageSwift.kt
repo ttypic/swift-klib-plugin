@@ -11,6 +11,7 @@ internal fun SwiftPackageDependency.toSwiftArgs(): List<String> = when (this) {
         if (inclusive) {
             // can't do inclusive range from command line
             // but I think it's better to use up-to-next-minor-from
+            // it needs to be rethink
             listOf(url, "--up-to-next-minor-from", from)
         } else {
             listOf(url, "--from", from, "--to", to)
