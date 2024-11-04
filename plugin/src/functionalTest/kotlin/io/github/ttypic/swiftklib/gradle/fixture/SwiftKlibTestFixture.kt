@@ -129,16 +129,16 @@ abstract class SwiftKlibTestFixture private constructor(
 
             // Only add minimum version configurations if they differ from defaults
             if (entry._minIos.hasValue()) {
-                appendLine("        minIos.set(${entry.minIos})")
+                appendLine("        minIos = \"${entry.minIos}\"")
             }
             if (entry._minMacos.hasValue()) {
-                appendLine("        minMacos.set(${entry.minMacos})")
+                appendLine("        minMacos = \"${entry.minMacos}\"")
             }
             if (entry._minTvos.hasValue()) {
-                appendLine("        minTvos.set(${entry.minTvos})")
+                appendLine("        minTvos = \"${entry.minTvos}\"")
             }
             if (entry._minWatchos.hasValue()) {
-                appendLine("        minWatchos.set(${entry.minWatchos})")
+                appendLine("        minWatchos = \"${entry.minWatchos}\"")
             }
 
             if (entry.dependencies.isNotEmpty()) {
@@ -190,16 +190,16 @@ val Plugin.Companion.kotlinMultiplatform
 
 private class TestSwiftKlibEntryImpl : SwiftKlibEntry {
     val _path = notNull<File>()
-    val _minIos = notNull<Int>()
-    val _minMacos = notNull<Int>()
-    val _minTvos = notNull<Int>()
-    val _minWatchos = notNull<Int>()
+    val _minIos = notNull<String>()
+    val _minMacos = notNull<String>()
+    val _minTvos = notNull<String>()
+    val _minWatchos = notNull<String>()
 
     override var path: File by _path
-    override var minIos: Int by _minIos
-    override var minMacos: Int by _minMacos
-    override var minTvos: Int by _minTvos
-    override var minWatchos: Int by _minWatchos
+    override var minIos: String by _minIos
+    override var minMacos: String by _minMacos
+    override var minTvos: String by _minTvos
+    override var minWatchos: String by _minWatchos
 
     val dependencies = mutableListOf<TestDependencyConfig>()
 
@@ -229,7 +229,8 @@ private class TestSwiftPackageConfigurationImpl : SwiftPackageConfiguration {
     }
 }
 
-private class TestRemotePackageConfigurationImpl(private val name: String) : RemotePackageConfiguration {
+private class TestRemotePackageConfigurationImpl(private val name: String) :
+    RemotePackageConfiguration {
 
     private var url: String? = null
     private var packageName: String? = null
@@ -242,7 +243,7 @@ private class TestRemotePackageConfigurationImpl(private val name: String) : Rem
 
     override fun url(url: String, packageName: String?) {
         this.url = url
-        this.packageName = name
+        this.packageName = packageName
     }
 
     override fun exactVersion(version: String) {
@@ -265,7 +266,8 @@ private class TestRemotePackageConfigurationImpl(private val name: String) : Rem
         return TestDependencyConfig.Remote(
             name = name,
             url = url,
-            version = versionConfig
+            version = versionConfig,
+            packageName = packageName
         )
     }
 }
@@ -280,12 +282,17 @@ private sealed interface TestDependencyConfig {
     data class Remote(
         val name: String,
         val url: String?,
-        val version: TestVersionConfig?
+        val version: TestVersionConfig?,
+        val packageName: String?
     ) : TestDependencyConfig {
         override fun toConfigString() = buildString {
             append("remote(\"$name\") {\n")
             if (url != null) {
-                append("                url(\"$url\")\n")
+                if (packageName != null) {
+                    append("                url(\"$url\", \"$packageName\")\n")
+                } else {
+                    append("                url(\"$url\")\n")
+                }
             }
             if (version != null) {
                 append("                ${version.toConfigString()}\n")
@@ -321,7 +328,8 @@ private class NotNullVar<T : Any>() : ReadWriteProperty<Any?, T> {
     private var value: T? = null
 
     public override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return value ?: throw IllegalStateException("Property ${property.name} should be initialized before get.")
+        return value
+            ?: throw IllegalStateException("Property ${property.name} should be initialized before get.")
     }
 
     public override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {

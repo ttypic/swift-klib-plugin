@@ -5,10 +5,10 @@ import java.io.File
 interface SwiftKlibEntry {
     var path: File
 
-    var minIos: Int
-    var minMacos: Int
-    var minTvos: Int
-    var minWatchos: Int
+    var minIos: String
+    var minMacos: String
+    var minTvos: String
+    var minWatchos: String
 
     fun packageName(name: String)
 
