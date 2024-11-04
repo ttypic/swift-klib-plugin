@@ -297,6 +297,42 @@ class SwiftPackageModulesTest {
         assertThat(result).output().contains("Package path must exist")
     }
 
+    @Test
+    fun `build with remote SPM dependency using Firebase is successful`() {
+        // Given
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                import FirebaseAuth
+                import Firebase
+
+                 @objc public class FirebaseData: NSObject {
+                     @objc public func printVersion() {
+                         print(FirebaseVersion())
+                         print(ActionCodeOperation.emailLink)
+                    }
+                }
+                """.trimIndent())
+            )
+            .withConfiguration {
+                minIos = "14.0"
+                minMacos = "10.15"
+                dependencies {
+                    remote("FirebaseAuth") {
+                        url("https://github.com/firebase/firebase-ios-sdk.git", "firebase-ios-sdk")
+                        exactVersion("11.0.0")
+                    }
+                }
+            }
+            .build()
+
+        // When
+        val result = build(fixture.gradleProject.rootDir, "build")
+
+        // Then
+        assertThat(result).task(":library:build").succeeded()
+        assertPackageResolved(fixture, "firebase-ios-sdk")
+    }
 
     private fun assertPackageResolved(fixture: SwiftKlibTestFixture, vararg packageNames: String) {
         val resolvedFile = File(

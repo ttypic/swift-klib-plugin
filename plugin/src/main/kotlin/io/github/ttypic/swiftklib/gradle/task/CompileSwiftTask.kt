@@ -30,10 +30,10 @@ abstract class CompileSwiftTask @Inject constructor(
     @Input val buildDirectory: String,
     @InputDirectory val pathProperty: Property<File>,
     @Input val packageNameProperty: Property<String>,
-    @Optional @Input val minIosProperty: Property<Int>,
-    @Optional @Input val minMacosProperty: Property<Int>,
-    @Optional @Input val minTvosProperty: Property<Int>,
-    @Optional @Input val minWatchosProperty: Property<Int>,
+    @Optional @Input val minIosProperty: Property<String>,
+    @Optional @Input val minMacosProperty: Property<String>,
+    @Optional @Input val minTvosProperty: Property<String>,
+    @Optional @Input val minWatchosProperty: Property<String>,
 ) : DefaultTask() {
 
     @get:Optional
@@ -81,10 +81,10 @@ abstract class CompileSwiftTask @Inject constructor(
         )
     }
 
-    private val minIos get() = minIosProperty.getOrElse(13)
-    private val minMacos get() = minMacosProperty.getOrElse(11)
-    private val minTvos get() = minTvosProperty.getOrElse(13)
-    private val minWatchos get() = minWatchosProperty.getOrElse(8)
+    private val minIos get() = minIosProperty.getOrElse("12.0")
+    private val minMacos get() = minMacosProperty.getOrElse("10.13")
+    private val minTvos get() = minTvosProperty.getOrElse("12.0")
+    private val minWatchos get() = minWatchosProperty.getOrElse("4.0")
 
     /**
      * Creates build directory or cleans up if it already exists
@@ -168,7 +168,7 @@ abstract class CompileSwiftTask @Inject constructor(
                 }
             }
         }
-
+        addPlatformBlock(cinteropName)
         execOperations.exec {
             it.executable = "swift"
             it.workingDir = swiftBuildDir
@@ -235,6 +235,27 @@ abstract class CompileSwiftTask @Inject constructor(
         }
     }
 
+    private fun addPlatformBlock(name: String) {
+        File(swiftBuildDir, "Package.swift").readText().run {
+            if (!contains("platforms:")) {
+                val entries = listOfNotNull(
+                    ".iOS(\"$minIos\")".takeIf { !minIos.isNullOrEmpty() },
+                    ".macOS(\"$minMacos\")".takeIf { !minMacos.isNullOrEmpty() },
+                    ".tvOS(\"$minTvos\")".takeIf { !minTvos.isNullOrEmpty() },
+                    ".watchOS(\"$minWatchos\")".takeIf { !minWatchos.isNullOrEmpty() },
+                ).joinToString(",")
+                if (entries.isNotEmpty()) {
+                    val updated =
+                        replace(
+                            "name: \"$name\",\n",
+                            "name: \"$name\",\n\tplatforms: [$entries],\n"
+                        )
+                    File(swiftBuildDir, "Package.swift").writeText(updated)
+                }
+            }
+        }
+    }
+
     private fun addDependencyBlockIfNeeded(name: String) {
         File(swiftBuildDir, "Package.swift").readText().run {
             if (!contains("dependencies:")) {
@@ -274,7 +295,7 @@ abstract class CompileSwiftTask @Inject constructor(
         }
 
         val releaseBuildPath =
-            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-macosx/release")
+            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/release")
 
         return SwiftBuildResult(
             libPath = File(releaseBuildPath, "lib${cinteropName}.a"),
@@ -284,16 +305,16 @@ abstract class CompileSwiftTask @Inject constructor(
 
     private fun generateBuildArgs(): List<String> {
         val sdkPath = readSdkPath()
-        val baseArgs = "swift build --arch ${compileTarget.arch()} -c release".split(" ")
-
-        val xcrunArgs = listOf(
-            "-sdk",
-            sdkPath,
-            "-target",
-            compileTarget.asSwiftcTarget(compileTarget.operatingSystem()),
-        ).asSwiftcArgs()
-
-        return baseArgs + xcrunArgs
+        return listOf(
+            "swift",
+            "build",
+            "-c",
+            "release",
+            "--triple",
+            "${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${minOs(compileTarget)}${compileTarget.simulatorSuffix()}",
+            "--sdk",
+            sdkPath
+        )
     }
 
     /** Workaround for bug in toolchain where the sdk path (via `swiftc -sdk` flag) is not propagated to clang. */
@@ -379,8 +400,8 @@ abstract class CompileSwiftTask @Inject constructor(
         val basicLinkerOpts = listOf(
             "-L/usr/lib/swift",
             "-$linkerPlatformVersion",
-            "${minOs(compileTarget)}.0",
-            "${minOs(compileTarget)}.0",
+            minOs(compileTarget),
+            minOs(compileTarget),
             "-L${xcodePath}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}"
         )
 
@@ -409,13 +430,13 @@ abstract class CompileSwiftTask @Inject constructor(
 
     private fun CompileTarget.operatingSystem(): String =
         when (this) {
-            CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> "ios$minIos"
-            CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> "watchos$minWatchos"
-            CompileTarget.tvosX64, CompileTarget.tvosArm64, CompileTarget.tvosSimulatorArm64 -> "tvos$minTvos"
-            CompileTarget.macosX64, CompileTarget.macosArm64 -> "macosx$minMacos"
+            CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> "ios"
+            CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> "watchos"
+            CompileTarget.tvosX64, CompileTarget.tvosArm64, CompileTarget.tvosSimulatorArm64 -> "tvos"
+            CompileTarget.macosX64, CompileTarget.macosArm64 -> "macosx"
         }
 
-    private fun minOs(compileTarget: CompileTarget): Int =
+    private fun minOs(compileTarget: CompileTarget): String? =
         when (compileTarget) {
             CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> minIos
             CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> minWatchos

@@ -16,16 +16,15 @@ internal abstract class SwiftKlibEntryImpl @Inject constructor(
 ) : SwiftKlibEntry {
     val _path: Property<File> = objects.property(File::class.java)
     val _packageName: Property<String> = objects.property(String::class.java)
-    val _minIos: Property<Int> = objects.property(Int::class.java).convention(13)
-    val _minMacos: Property<Int> = objects.property(Int::class.java).convention(11)
-    val _minTvos: Property<Int> = objects.property(Int::class.java).convention(13)
-    val _minWatchos: Property<Int> = objects.property(Int::class.java).convention(8)
-
+    val _minIos: Property<String> = objects.property(String::class.java).convention("12.0")
+    val _minMacos: Property<String> = objects.property(String::class.java).convention("10.13")
+    val _minTvos: Property<String> = objects.property(String::class.java).convention("12.0")
+    val _minWatchos: Property<String> = objects.property(String::class.java).convention("4.0")
     override var path: File by _path.bind()
-    override var minIos: Int by _minIos.bind()
-    override var minMacos: Int by _minMacos.bind()
-    override var minTvos: Int by _minTvos.bind()
-    override var minWatchos: Int by _minWatchos.bind()
+    override var minIos: String by _minIos.bind()
+    override var minMacos: String by _minMacos.bind()
+    override var minTvos: String by _minTvos.bind()
+    override var minWatchos: String by _minWatchos.bind()
 
     internal val dependencyHandler = SwiftPackageConfigurationImpl(objects)
 
