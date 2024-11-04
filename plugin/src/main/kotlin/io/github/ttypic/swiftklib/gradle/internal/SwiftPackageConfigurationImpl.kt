@@ -25,7 +25,10 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
     }
 
     @ExperimentalSwiftklibApi
-    override fun remote(name: List<String>, configuration: RemotePackageConfiguration.() -> Unit) {
+    override fun remote(
+        name: List<String>,
+        configuration: RemotePackageConfiguration.() -> Unit
+    ) {
         val builder = RemotePackageConfigurationImpl(objects, name)
         builder.apply(configuration)
 
@@ -42,6 +45,14 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
         name: String,
         configuration: RemotePackageConfiguration.() -> Unit
     ) {
-        remote(listOf(name), configuration)
+        val builder = RemotePackageConfigurationImpl(objects, listOf(name))
+        builder.apply(configuration)
+
+        val dependency = builder.build()
+            ?: throw IllegalStateException("No version specification provided for remote package $name")
+
+        val currentDeps = _dependencies.get().toMutableList()
+        currentDeps.add(dependency)
+        _dependencies.set(currentDeps)
     }
 }
