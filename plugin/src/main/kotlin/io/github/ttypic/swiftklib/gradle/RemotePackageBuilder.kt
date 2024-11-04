@@ -8,7 +8,7 @@ import javax.inject.Inject
 @ExperimentalSwiftklibApi
 class RemotePackageBuilder @Inject constructor(
     private val objects: ObjectFactory,
-    private val name: String
+    private val name: List<String>
 ) {
     private val urlProperty: Property<String> = objects.property(String::class.java)
     private var dependency: SwiftPackageDependency.Remote? = null

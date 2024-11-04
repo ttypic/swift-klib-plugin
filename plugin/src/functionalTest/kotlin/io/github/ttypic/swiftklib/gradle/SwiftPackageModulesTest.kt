@@ -334,6 +334,45 @@ class SwiftPackageModulesTest {
         assertPackageResolved(fixture, "firebase-ios-sdk")
     }
 
+    @Test
+    fun `build with remote SPM dependency using multi product Firebase is successful`() {
+        // Given
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                import FirebaseAuth
+                import Firebase
+                import FirebaseRemoteConfig
+
+                 @objc public class FirebaseData: NSObject {
+                     @objc public func testLinking() {
+                         print(FirebaseVersion())
+                         print(ActionCodeOperation.emailLink)
+                         print(RemoteConfigSettings())
+                    }
+                }
+                """.trimIndent())
+            )
+            .withConfiguration {
+                minIos = "14.0"
+                minMacos = "10.15"
+                dependencies {
+                    remote(listOf("FirebaseAuth", "FirebaseRemoteConfig")) {
+                        url("https://github.com/firebase/firebase-ios-sdk.git", "firebase-ios-sdk")
+                        exactVersion("11.0.0")
+                    }
+                }
+            }
+            .build()
+
+        // When
+        val result = build(fixture.gradleProject.rootDir, "build")
+
+        // Then
+        assertThat(result).task(":library:build").succeeded()
+        assertPackageResolved(fixture, "firebase-ios-sdk")
+    }
+
     private fun assertPackageResolved(fixture: SwiftKlibTestFixture, vararg packageNames: String) {
         val resolvedFile = File(
             fixture.gradleProject.rootDir,

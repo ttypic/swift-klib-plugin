@@ -187,25 +187,28 @@ abstract class CompileSwiftTask @Inject constructor(
         }
 
         dependencies.forEach { dependency ->
-            execOperations.exec {
-                it.executable = "swift"
-                it.workingDir = swiftBuildDir
-                it.isIgnoreExitValue = true
-                it.args = listOf(
-                    "package",
-                    "add-target-dependency",
-                    dependency.name,
-                    "--package",
-                    dependency.packageName ?: dependency.name,
-                    cinteropName,
-                )
-            }.run {
-                if (exitValue != 0) {
-                    throw RuntimeException(
-                        "Failed to add Swift Package target dependency $cinteropName - package = ${dependency.name}",
+            dependency.name.forEach { library ->
+                execOperations.exec {
+                    it.executable = "swift"
+                    it.workingDir = swiftBuildDir
+                    it.isIgnoreExitValue = true
+                    it.args = listOf(
+                        "package",
+                        "add-target-dependency",
+                        library,
+                        "--package",
+                        dependency.packageName ?: library,
+                        cinteropName,
                     )
+                }.run {
+                    if (exitValue != 0) {
+                        throw RuntimeException(
+                            "Failed to add Swift Package target dependency $cinteropName - package = ${dependency.packageName ?: library}:$library",
+                        )
+                    }
                 }
             }
+
         }
 
         execOperations.exec {
