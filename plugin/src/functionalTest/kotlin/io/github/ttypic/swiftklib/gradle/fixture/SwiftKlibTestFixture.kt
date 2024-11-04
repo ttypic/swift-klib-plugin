@@ -223,13 +223,17 @@ private class TestSwiftPackageConfigurationImpl : SwiftPackageConfiguration {
     }
 
     override fun remote(name: String, configuration: RemotePackageConfiguration.() -> Unit) {
+        remote(listOf(name), configuration)
+    }
+
+    override fun remote(name: List<String>, configuration: RemotePackageConfiguration.() -> Unit) {
         val config = TestRemotePackageConfigurationImpl(name)
         config.configuration()
         dependencies.add(config.build())
     }
 }
 
-private class TestRemotePackageConfigurationImpl(private val name: String) :
+private class TestRemotePackageConfigurationImpl(private val name: List<String>) :
     RemotePackageConfiguration {
 
     private var url: String? = null
@@ -280,13 +284,17 @@ private sealed interface TestDependencyConfig {
     }
 
     data class Remote(
-        val name: String,
+        val name: List<String>,
         val url: String?,
         val version: TestVersionConfig?,
         val packageName: String?
     ) : TestDependencyConfig {
         override fun toConfigString() = buildString {
-            append("remote(\"$name\") {\n")
+            if (name.size == 1) {
+                append("remote(\"${name.first()}\") {\n")
+            } else {
+                append("remote(listOf(\"${name.joinToString("\",\"")}\")) {\n")
+            }
             if (url != null) {
                 if (packageName != null) {
                     append("                url(\"$url\", \"$packageName\")\n")

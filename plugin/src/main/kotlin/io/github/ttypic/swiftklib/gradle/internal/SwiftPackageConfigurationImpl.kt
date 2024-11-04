@@ -20,15 +20,12 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
     @ExperimentalSwiftklibApi
     override fun local(name: String, path: java.io.File) {
         val currentDeps = _dependencies.get().toMutableList()
-        currentDeps.add(SwiftPackageDependency.Local(name, path))
+        currentDeps.add(SwiftPackageDependency.Local(listOf(name), path))
         _dependencies.set(currentDeps)
     }
 
     @ExperimentalSwiftklibApi
-    override fun remote(
-        name: String,
-        configuration: RemotePackageConfiguration.() -> Unit
-    ) {
+    override fun remote(name: List<String>, configuration: RemotePackageConfiguration.() -> Unit) {
         val builder = RemotePackageConfigurationImpl(objects, name)
         builder.apply(configuration)
 
@@ -38,5 +35,13 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
         val currentDeps = _dependencies.get().toMutableList()
         currentDeps.add(dependency)
         _dependencies.set(currentDeps)
+    }
+
+    @ExperimentalSwiftklibApi
+    override fun remote(
+        name: String,
+        configuration: RemotePackageConfiguration.() -> Unit
+    ) {
+        remote(listOf(name), configuration)
     }
 }

@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 internal class RemotePackageConfigurationImpl @Inject constructor(
     private val objects: ObjectFactory,
-    private val name: String
+    private val name: List<String>
 ) : RemotePackageConfiguration {
     private val urlProperty = objects.property(String::class.java)
     private val packageName = objects.property(String::class.java)
