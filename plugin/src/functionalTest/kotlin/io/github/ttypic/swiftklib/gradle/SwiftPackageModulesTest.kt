@@ -373,6 +373,63 @@ class SwiftPackageModulesTest {
         assertPackageResolved(fixture, "firebase-ios-sdk")
     }
 
+    @Test
+    fun `build with complex and mix spm repo`() {
+        // Given
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                import FirebaseAuth
+                import Firebase
+                import FirebaseRemoteConfig
+                import KeychainAccess
+                import SwiftyJSON
+
+                @objc public class FirebaseData: NSObject {
+                     @objc public func testLinking() {
+                         print(FirebaseVersion())
+                         print(ActionCodeOperation.emailLink)
+                         print(RemoteConfigSettings())
+                    }
+                }
+                @objc public class DataManager: NSObject {
+                    private let keychain = Keychain(service: "test-service")
+
+                    @objc public func processJson(jsonString: String) throws -> String {
+                        let json = try JSON(parseJSON: jsonString)
+                        return json.description
+                    }
+                }
+                """.trimIndent())
+            )
+            .withConfiguration {
+                minIos = "14.0"
+                minMacos = "10.15"
+                dependencies {
+                    remote(listOf("FirebaseAuth", "FirebaseRemoteConfig")) {
+                        url("https://github.com/firebase/firebase-ios-sdk.git", "firebase-ios-sdk")
+                        exactVersion("11.0.0")
+                    }
+                    remote("KeychainAccess") {
+                        github("kishikawakatsumi", "KeychainAccess")
+                        exactVersion("4.2.2")
+                    }
+                    remote("SwiftyJSON") {
+                        github("SwiftyJSON", "SwiftyJSON")
+                        versionRange("5.0.0", "6.0.0", true)
+                    }
+                }
+            }
+            .build()
+
+        // When
+        val result = build(fixture.gradleProject.rootDir, "build")
+
+        // Then
+        assertThat(result).task(":library:build").succeeded()
+        assertPackageResolved(fixture, "firebase-ios-sdk")
+    }
+
     private fun assertPackageResolved(fixture: SwiftKlibTestFixture, vararg packageNames: String) {
         val resolvedFile = File(
             fixture.gradleProject.rootDir,

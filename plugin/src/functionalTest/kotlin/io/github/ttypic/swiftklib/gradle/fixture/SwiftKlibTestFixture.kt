@@ -226,8 +226,8 @@ private class TestSwiftPackageConfigurationImpl : SwiftPackageConfiguration {
         remote(listOf(name), configuration)
     }
 
-    override fun remote(name: List<String>, configuration: RemotePackageConfiguration.() -> Unit) {
-        val config = TestRemotePackageConfigurationImpl(name)
+    override fun remote(names: List<String>, configuration: RemotePackageConfiguration.() -> Unit) {
+        val config = TestRemotePackageConfigurationImpl(names)
         config.configuration()
         dependencies.add(config.build())
     }
