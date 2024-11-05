@@ -11,16 +11,16 @@ interface SwiftPackageConfiguration {
 
     /**
      * Configures a remote package dependency.
-     * @param name Package name
+     * @param name the product's name to add
      * @param configuration Configuration block for the remote package
      */
     fun remote(name: String, configuration: RemotePackageConfiguration.() -> Unit)
 
     /**
      * Configures a remote package dependency.
-     * @param name a list of product to add
+     * @param names a list of product's name to add
      * @param configuration Configuration block for the remote package
      */
-    fun remote(name: List<String>, configuration: RemotePackageConfiguration.() -> Unit)
+    fun remote(names: List<String>, configuration: RemotePackageConfiguration.() -> Unit)
 }
 
