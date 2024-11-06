@@ -86,7 +86,7 @@ abstract class CompileSwiftTask @Inject constructor(
     private val minMacos get() = minMacosProperty.getOrElse("10.13")
     private val minTvos get() = minTvosProperty.getOrElse("12.0")
     private val minWatchos get() = minWatchosProperty.getOrElse("4.0")
-    private val toolsVersion get() = toolsVersionProperty.get()
+    private val toolsVersion get() = toolsVersionProperty.getOrElse("")
     /**
      * Creates build directory or cleans up if it already exists
      * and copies Swift source files to it
@@ -317,7 +317,7 @@ abstract class CompileSwiftTask @Inject constructor(
         }
 
         val releaseBuildPath =
-            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/release")
+            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/debug")
 
         return SwiftBuildResult(
             libPath = File(releaseBuildPath, "lib${cinteropName}.a"),
