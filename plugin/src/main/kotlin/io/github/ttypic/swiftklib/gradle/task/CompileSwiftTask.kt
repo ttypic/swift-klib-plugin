@@ -317,7 +317,7 @@ abstract class CompileSwiftTask @Inject constructor(
         }
 
         val releaseBuildPath =
-            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/debug")
+            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/release")
 
         return SwiftBuildResult(
             libPath = File(releaseBuildPath, "lib${cinteropName}.a"),
