@@ -3,7 +3,7 @@ package io.github.ttypic.swiftklib.gradle.task
 import io.github.ttypic.swiftklib.gradle.CompileTarget
 import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
 import io.github.ttypic.swiftklib.gradle.SwiftPackageDependency
-import io.github.ttypic.swiftklib.gradle.templates.toSwiftArgs
+import io.github.ttypic.swiftklib.gradle.templates.createPackageSwiftContents
 import io.github.ttypic.swiftklib.gradle.util.StringReplacingOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.ListProperty
@@ -87,6 +87,7 @@ abstract class CompileSwiftTask @Inject constructor(
     private val minTvos get() = minTvosProperty.getOrElse("12.0")
     private val minWatchos get() = minWatchosProperty.getOrElse("4.0")
     private val toolsVersion get() = toolsVersionProperty.getOrElse("")
+
     /**
      * Creates build directory or cleans up if it already exists
      * and copies Swift source files to it
@@ -119,171 +120,21 @@ abstract class CompileSwiftTask @Inject constructor(
     }
 
     private fun createPackageSwift(dependencies: List<SwiftPackageDependency>) {
-        execOperations.exec {
-            it.executable = "swift"
-            it.workingDir = swiftBuildDir
-            it.isIgnoreExitValue = true
-            it.args = listOf(
-                "package",
-                "init",
-                "--name",
-                cinteropName,
-                "--type",
-                "empty",
-                "--disable-xctest",
-                "--disable-swift-testing"
-            )
-        }.run {
-            if (exitValue != 0) {
-                throw RuntimeException("Failed to init Swift Package")
-            }
-        }
-
-        if (!toolsVersion.isNullOrEmpty()) {
-            execOperations.exec {
-                it.executable = "swift"
-                it.workingDir = swiftBuildDir
-                it.isIgnoreExitValue = true
-                it.args = listOf(
-                    "package",
-                    "tools-version",
-                    "--set",
-                    toolsVersion
-                )
-            }.run {
-                if (exitValue != 0) {
-                    throw RuntimeException("Failed to set the tool version $toolsVersion")
-                }
-            }
-        }
-
-        dependencies.forEach { dependency ->
-            if (dependency is SwiftPackageDependency.Local) {
-                addDependencyBlockIfNeeded(cinteropName)
-                val escapePath = dependency.path.absolutePath.replace("/", "\\/")
-                execOperations.exec {
-                    it.executable = "sed"
-                    it.workingDir = swiftBuildDir
-                    it.args = listOf(
-                        "-i",
-                        "''",
-                        "/dependencies: \\[/,/]/ s/]/    \\n\\t.package(path: \"${escapePath}\"),\\n]/",
-                        "Package.swift"
-                    )
-                    it.isIgnoreExitValue = true
-                }
-            } else {
-                execOperations.exec {
-                    it.executable = "swift"
-                    it.workingDir = swiftBuildDir
-                    it.args = listOf("package", "add-dependency") + dependency.toSwiftArgs()
-                    it.isIgnoreExitValue = true
-                }
-            }.run {
-                if (exitValue != 0) {
-                    throw RuntimeException(
-                        "Failed to add Swift Package dependency $dependency",
-                    )
-                }
-            }
-        }
-        addPlatformBlock(cinteropName)
-        execOperations.exec {
-            it.executable = "swift"
-            it.workingDir = swiftBuildDir
-            it.args = listOf(
-                "package",
-                "add-target",
-                "--path",
-                cinteropName,
-                cinteropName
-            )
-            it.isIgnoreExitValue = true
-        }.run {
-            if (exitValue != 0) {
-                throw RuntimeException("Failed to add Swift Package target $cinteropName")
-            }
-        }
-
-        dependencies.forEach { dependency ->
-            dependency.name.forEach { library ->
-                execOperations.exec {
-                    it.executable = "swift"
-                    it.workingDir = swiftBuildDir
-                    it.isIgnoreExitValue = true
-                    it.args = listOf(
-                        "package",
-                        "add-target-dependency",
-                        library,
-                        "--package",
-                        dependency.packageName ?: library,
-                        cinteropName,
-                    )
-                }.run {
-                    if (exitValue != 0) {
-                        throw RuntimeException(
-                            "Failed to add Swift Package target dependency $cinteropName - package = ${dependency.packageName ?: library}:$library",
-                        )
-                    }
-                }
-            }
-
-        }
-
-        execOperations.exec {
-            it.executable = "swift"
-            it.workingDir = swiftBuildDir
-            it.isIgnoreExitValue = true
-            it.args = listOf(
-                "package",
-                "add-product",
-                "--targets",
-                cinteropName,
-                "--type",
-                "static-library",
-                cinteropName
-            )
-        }.run {
-            if (exitValue != 0) {
-                throw RuntimeException(
-                    "Failed to add Swift Package library $cinteropName",
-                )
-            }
-        }
+        createPackageSwiftContents(
+            cinteropName,
+            dependencies,
+            execOperations,
+            swiftBuildDir,
+            minIos,
+            minMacos,
+            minTvos,
+            minWatchos,
+            toolsVersion
+        )
         if (printDebug) {
             logger.warn("========   Package.swift contents   ========")
             logger.warn(File(swiftBuildDir, "Package.swift").readText())
-            logger.warn("======== | Package.swift contents | ========")
-        }
-    }
-
-    private fun addPlatformBlock(name: String) {
-        File(swiftBuildDir, "Package.swift").readText().run {
-            if (!contains("platforms:")) {
-                val entries = listOfNotNull(
-                    ".iOS(\"$minIos\")".takeIf { !minIos.isNullOrEmpty() },
-                    ".macOS(\"$minMacos\")".takeIf { !minMacos.isNullOrEmpty() },
-                    ".tvOS(\"$minTvos\")".takeIf { !minTvos.isNullOrEmpty() },
-                    ".watchOS(\"$minWatchos\")".takeIf { !minWatchos.isNullOrEmpty() },
-                ).joinToString(",")
-                if (entries.isNotEmpty()) {
-                    val updated =
-                        replace(
-                            "name: \"$name\",\n",
-                            "name: \"$name\",\n\tplatforms: [$entries],\n"
-                        )
-                    File(swiftBuildDir, "Package.swift").writeText(updated)
-                }
-            }
-        }
-    }
-
-    private fun addDependencyBlockIfNeeded(name: String) {
-        File(swiftBuildDir, "Package.swift").readText().run {
-            if (!contains("dependencies:")) {
-                val updated = replace("name: \"$name\"", "name: \"$name\",\n\tdependencies: []")
-                File(swiftBuildDir, "Package.swift").writeText(updated)
-            }
+            logger.warn("=addPlatformBlock======= | Package.swift contents | ========")
         }
     }
 
@@ -317,7 +168,10 @@ abstract class CompileSwiftTask @Inject constructor(
         }
 
         val releaseBuildPath =
-            File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/release")
+            File(
+                swiftBuildDir,
+                ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/release"
+            )
 
         return SwiftBuildResult(
             libPath = File(releaseBuildPath, "lib${cinteropName}.a"),
@@ -346,7 +200,6 @@ abstract class CompileSwiftTask @Inject constructor(
             readSdkPath(),
         ).asCcArgs()
 
-    private fun List<String>.asSwiftcArgs() = asBuildToolArgs("swiftc")
     private fun List<String>.asCcArgs() = asBuildToolArgs("cc")
 
     private fun List<String>.asBuildToolArgs(tool: String): List<String> {
