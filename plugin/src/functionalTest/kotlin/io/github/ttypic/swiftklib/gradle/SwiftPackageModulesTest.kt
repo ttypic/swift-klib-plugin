@@ -411,7 +411,6 @@ class SwiftPackageModulesTest {
                 import KeychainAccess
                 import SwiftyJSON
                 import DummyFramework
-                import SwiftProtobuf
 
                 @objc public class FirebaseData: NSObject {
                      @objc public func testLinking() {
