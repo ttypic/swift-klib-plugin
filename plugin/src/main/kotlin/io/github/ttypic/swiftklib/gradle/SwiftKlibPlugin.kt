@@ -59,6 +59,7 @@ class SwiftKlibPlugin : Plugin<Project> {
                     entry._minMacos,
                     entry._minTvos,
                     entry._minWatchos,
+                    entry._toolsVersion
                 ).configure {
                     it.dependenciesProperty = entry.dependencyHandler.dependencies
                 }

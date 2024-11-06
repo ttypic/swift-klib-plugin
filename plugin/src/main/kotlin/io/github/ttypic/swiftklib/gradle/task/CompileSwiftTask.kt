@@ -34,6 +34,7 @@ abstract class CompileSwiftTask @Inject constructor(
     @Optional @Input val minMacosProperty: Property<String>,
     @Optional @Input val minTvosProperty: Property<String>,
     @Optional @Input val minWatchosProperty: Property<String>,
+    @Optional @Input val toolsVersionProperty: Property<String?>,
 ) : DefaultTask() {
 
     @get:Optional
@@ -85,7 +86,7 @@ abstract class CompileSwiftTask @Inject constructor(
     private val minMacos get() = minMacosProperty.getOrElse("10.13")
     private val minTvos get() = minTvosProperty.getOrElse("12.0")
     private val minWatchos get() = minWatchosProperty.getOrElse("4.0")
-
+    private val toolsVersion get() = toolsVersionProperty.get()
     /**
      * Creates build directory or cleans up if it already exists
      * and copies Swift source files to it
@@ -135,6 +136,24 @@ abstract class CompileSwiftTask @Inject constructor(
         }.run {
             if (exitValue != 0) {
                 throw RuntimeException("Failed to init Swift Package")
+            }
+        }
+
+        if (!toolsVersion.isNullOrEmpty()) {
+            execOperations.exec {
+                it.executable = "swift"
+                it.workingDir = swiftBuildDir
+                it.isIgnoreExitValue = true
+                it.args = listOf(
+                    "package",
+                    "tools-version",
+                    "--set",
+                    toolsVersion
+                )
+            }.run {
+                if (exitValue != 0) {
+                    throw RuntimeException("Failed to set the tool version $toolsVersion")
+                }
             }
         }
 

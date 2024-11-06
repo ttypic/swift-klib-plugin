@@ -16,6 +16,7 @@ internal abstract class SwiftKlibEntryImpl @Inject constructor(
 ) : SwiftKlibEntry {
     val _path: Property<File> = objects.property(File::class.java)
     val _packageName: Property<String> = objects.property(String::class.java)
+    val _toolsVersion: Property<String?> = objects.property(String::class.java)
     val _minIos: Property<String> = objects.property(String::class.java).convention("12.0")
     val _minMacos: Property<String> = objects.property(String::class.java).convention("10.13")
     val _minTvos: Property<String> = objects.property(String::class.java).convention("12.0")
@@ -25,6 +26,7 @@ internal abstract class SwiftKlibEntryImpl @Inject constructor(
     override var minMacos: String by _minMacos.bind()
     override var minTvos: String by _minTvos.bind()
     override var minWatchos: String by _minWatchos.bind()
+    override var toolsVersion: String? by _toolsVersion.bind()
 
     internal val dependencyHandler = SwiftPackageConfigurationImpl(objects)
 
