@@ -5,6 +5,9 @@ import io.github.ttypic.swiftklib.gradle.api.ExperimentalSwiftklibApi
 import io.github.ttypic.swiftklib.gradle.api.RemotePackageConfiguration
 import io.github.ttypic.swiftklib.gradle.api.SwiftPackageConfiguration
 import org.gradle.api.model.ObjectFactory
+import java.io.File
+import java.net.URI
+import java.net.URL
 import javax.inject.Inject
 
 internal class SwiftPackageConfigurationImpl @Inject constructor(
@@ -18,9 +21,21 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
     internal val dependencies get() = _dependencies
 
     @ExperimentalSwiftklibApi
-    override fun local(name: String, path: java.io.File) {
+    override fun local(name: String, path: File) {
         val currentDeps = _dependencies.get().toMutableList()
         currentDeps.add(SwiftPackageDependency.Local(listOf(name), path))
+        _dependencies.set(currentDeps)
+    }
+
+    override fun localBinary(name: String, path: File) {
+        val currentDeps = _dependencies.get().toMutableList()
+        currentDeps.add(SwiftPackageDependency.LocalBinary(listOf(name), path))
+        _dependencies.set(currentDeps)
+    }
+
+    override fun remoteBinary(name: String, url: URI, checksum: String?) {
+        val currentDeps = _dependencies.get().toMutableList()
+        currentDeps.add(SwiftPackageDependency.RemoteBinary(listOf(name), url, checksum))
         _dependencies.set(currentDeps)
     }
 

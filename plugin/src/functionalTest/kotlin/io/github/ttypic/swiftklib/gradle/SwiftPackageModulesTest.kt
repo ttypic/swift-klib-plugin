@@ -8,6 +8,7 @@ import io.github.ttypic.swiftklib.gradle.fixture.SwiftSource
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.net.URI
 
 class SwiftPackageModulesTest {
 
@@ -16,7 +17,8 @@ class SwiftPackageModulesTest {
         // Given
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                     import Foundation
                     import KeychainAccess
 
@@ -27,7 +29,8 @@ class SwiftPackageModulesTest {
                             try keychain.set(value, key: key)
                         }
                     }
-                """.trimIndent())
+                """.trimIndent()
+                )
             )
             .withConfiguration {
                 dependencies {
@@ -51,14 +54,16 @@ class SwiftPackageModulesTest {
     fun `build with remote SPM dependency using version range is successful`() {
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                     import Foundation
                     import KeychainAccess
 
                     @objc public class KeychainManager: NSObject {
                         private let keychain = Keychain(service: "test-service")
                     }
-                """.trimIndent())
+                """.trimIndent()
+                )
             )
             .withConfiguration {
                 dependencies {
@@ -82,14 +87,16 @@ class SwiftPackageModulesTest {
     fun `build with remote SPM dependency using branch is successful`() {
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                 import Foundation
                 import KeychainAccess
 
                 @objc public class KeychainManager: NSObject {
                     private let keychain = Keychain(service: "test-service")
                 }
-            """.trimIndent())
+            """.trimIndent()
+                )
             )
             .withConfiguration {
                 dependencies {
@@ -115,7 +122,8 @@ class SwiftPackageModulesTest {
         val localPackageDir = File(createTempDir(), "LocalPackage").apply {
             mkdirs()
             // Create Package.swift
-            File(this, "Package.swift").writeText("""
+            File(this, "Package.swift").writeText(
+                """
             // swift-tools-version:5.3
             import PackageDescription
 
@@ -128,11 +136,13 @@ class SwiftPackageModulesTest {
                     .target(name: "LocalPackage"),
                 ]
             )
-        """.trimIndent())
+        """.trimIndent()
+            )
 
             // Create source files
             File(this, "Sources/LocalPackage").mkdirs()
-            File(this, "Sources/LocalPackage/LocalHelper.swift").writeText("""
+            File(this, "Sources/LocalPackage/LocalHelper.swift").writeText(
+                """
             import Foundation
 
             @objc public class LocalHelper: NSObject {
@@ -140,12 +150,14 @@ class SwiftPackageModulesTest {
                     return "1.0.0"
                 }
             }
-        """.trimIndent())
+        """.trimIndent()
+            )
         }
 
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                 import Foundation
                 import LocalPackage
 
@@ -154,7 +166,8 @@ class SwiftPackageModulesTest {
                         return LocalHelper.getVersion()
                     }
                 }
-            """.trimIndent())
+            """.trimIndent()
+                )
             )
             .withConfiguration {
                 dependencies {
@@ -178,7 +191,8 @@ class SwiftPackageModulesTest {
     fun `build with multiple dependencies is successful`() {
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                     import Foundation
                     import KeychainAccess
                     import SwiftyJSON
@@ -191,7 +205,8 @@ class SwiftPackageModulesTest {
                             return json.description
                         }
                     }
-                """.trimIndent())
+                """.trimIndent()
+                )
             )
             .withConfiguration {
                 dependencies {
@@ -275,7 +290,8 @@ class SwiftPackageModulesTest {
         val result = buildAndFail(fixture.gradleProject.rootDir, "build")
 
         // Then
-        assertThat(result).output().contains("No version specification provided for remote package Test")
+        assertThat(result).output()
+            .contains("No version specification provided for remote package Test")
     }
 
     @Test
@@ -302,7 +318,8 @@ class SwiftPackageModulesTest {
         // Given
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                 import FirebaseAuth
                 import Firebase
 
@@ -312,7 +329,8 @@ class SwiftPackageModulesTest {
                          print(ActionCodeOperation.emailLink)
                     }
                 }
-                """.trimIndent())
+                """.trimIndent()
+                )
             )
             .withConfiguration {
                 minIos = "14.0"
@@ -339,7 +357,8 @@ class SwiftPackageModulesTest {
         // Given
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                 import FirebaseAuth
                 import Firebase
                 import FirebaseRemoteConfig
@@ -351,7 +370,8 @@ class SwiftPackageModulesTest {
                          print(RemoteConfigSettings())
                     }
                 }
-                """.trimIndent())
+                """.trimIndent()
+                )
             )
             .withConfiguration {
                 minIos = "14.0"
@@ -378,7 +398,8 @@ class SwiftPackageModulesTest {
         // Given
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                 import FirebaseAuth
                 import Firebase
                 import FirebaseRemoteConfig
@@ -400,7 +421,8 @@ class SwiftPackageModulesTest {
                         return json.description
                     }
                 }
-                """.trimIndent())
+                """.trimIndent()
+                )
             )
             .withConfiguration {
                 minIos = "14.0"
@@ -434,9 +456,11 @@ class SwiftPackageModulesTest {
     fun `build with valid toolsVersion`() {
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                 import Foundation
-            """.trimIndent())
+            """.trimIndent()
+                )
             )
             .withConfiguration {
                 toolsVersion = "5.5"
@@ -459,9 +483,11 @@ class SwiftPackageModulesTest {
     fun `build with invalid toolsVersion`() {
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
-                SwiftSource.of(content = """
+                SwiftSource.of(
+                    content = """
                 import Foundation
-            """.trimIndent())
+            """.trimIndent()
+                )
             )
             .withConfiguration {
                 toolsVersion = "5.3"
@@ -479,6 +505,70 @@ class SwiftPackageModulesTest {
             assertTrue(manifest.contains("swift-tools-version:5.3"))
         }
     }
+
+    @Test
+    fun `build with local binary xcframework`() {
+        val xcframeworkDirectory = File("src/functionalTest/resources/DummyFramework.xcframework")
+        assertTrue(
+            xcframeworkDirectory.exists(),
+            "Dummy XCFramework not found, see localbinary folder"
+        )
+
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(
+                    content = """
+                import DummyFramework
+
+                @objc public class DummyCode: NSObject {
+                    @objc public func testLinking() {
+                        MyDummyFramework().printSomeValue()
+                   }
+                }
+            """.trimIndent()
+                )
+            )
+            .withConfiguration {
+                dependencies {
+                    localBinary("DummyFramework", xcframeworkDirectory)
+                }
+            }
+            .build()
+
+        // When
+        build(fixture.gradleProject.rootDir, "build")
+    }
+
+    @Test
+    fun `build with remote binary xcframework`() {
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(
+                    content = """
+                import SwiftProtobuf
+
+                @objc public class DummyCode: NSObject {
+                    @objc public func testLinking() {
+                   }
+                }
+            """.trimIndent()
+                )
+            )
+            .withConfiguration {
+                dependencies {
+                    remoteBinary(
+                        "SwiftProtobuf",
+                        URI("https://github.com/hewigovens/wallet-core-spm/releases/download/0.0.1/SwiftProtobuf.xcframework.zip"),
+                        "270a6545f72a512aafc7d7ecb73621005248d4ea44f7ebbc06a2f33c7d15bc4c"
+                    )
+                }
+            }
+            .build()
+
+        // When
+        build(fixture.gradleProject.rootDir, "build")
+    }
+
 
     private fun assertPackageResolved(fixture: SwiftKlibTestFixture, vararg packageNames: String) {
         val resolvedFile = File(
@@ -506,7 +596,10 @@ class SwiftPackageModulesTest {
         content(resolvedFile.readText())
     }
 
-    private fun getPackageResolvedContent(fixture: SwiftKlibTestFixture, content: (String) -> Unit) {
+    private fun getPackageResolvedContent(
+        fixture: SwiftKlibTestFixture,
+        content: (String) -> Unit
+    ) {
         val resolvedFile = File(
             fixture.gradleProject.rootDir,
             "library/build/swiftklib/test/iosArm64/swiftBuild/Package.resolved"

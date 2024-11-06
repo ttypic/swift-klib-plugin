@@ -9,6 +9,8 @@ import io.github.ttypic.swiftklib.gradle.api.RemotePackageConfiguration
 import io.github.ttypic.swiftklib.gradle.api.SwiftKlibEntry
 import io.github.ttypic.swiftklib.gradle.api.SwiftPackageConfiguration
 import java.io.File
+import java.net.URI
+import java.net.URL
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -228,6 +230,14 @@ private class TestSwiftPackageConfigurationImpl : SwiftPackageConfiguration {
         dependencies.add(TestDependencyConfig.Local(name, path))
     }
 
+    override fun localBinary(name: String, path: File) {
+        dependencies.add(TestDependencyConfig.LocalBinary(name, path))
+    }
+
+    override fun remoteBinary(name: String, url: URI, checksum: String?) {
+        dependencies.add(TestDependencyConfig.RemoteBinary(name, url, checksum))
+    }
+
     override fun remote(name: String, configuration: RemotePackageConfiguration.() -> Unit) {
         remote(listOf(name), configuration)
     }
@@ -287,6 +297,14 @@ private sealed interface TestDependencyConfig {
 
     data class Local(val name: String, val path: File) : TestDependencyConfig {
         override fun toConfigString() = """local("$name", file("${path.absolutePath}"))"""
+    }
+
+    data class LocalBinary(val name: String, val path: File) : TestDependencyConfig {
+        override fun toConfigString() = """localBinary("$name", File("${path.absolutePath}"))"""
+    }
+
+    data class RemoteBinary(val name: String, val url: URI, val checksum: String?) : TestDependencyConfig {
+        override fun toConfigString() = """remoteBinary("$name", uri("$url"), "$checksum")"""
     }
 
     data class Remote(

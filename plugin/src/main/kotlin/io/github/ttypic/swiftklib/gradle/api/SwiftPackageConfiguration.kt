@@ -1,5 +1,7 @@
 package io.github.ttypic.swiftklib.gradle.api
 
+import java.net.URI
+
 @ExperimentalSwiftklibApi
 interface SwiftPackageConfiguration {
     /**
@@ -8,6 +10,22 @@ interface SwiftPackageConfiguration {
      * @param path Local path to the package
      */
     fun local(name: String, path: java.io.File)
+
+    /**
+     * Configures a local xcframework dependency
+     * @param name Package name
+     * @param path Local path to the xcframework (ex: /path/to/my.xcframework)
+     */
+    fun localBinary(name: String, path: java.io.File)
+
+    /**
+     * Configures a remote xcframework dependency
+     * The xcframework folder need to be compressed
+     * @param name Package name
+     * @param url Remote url to the xcframework (ex: https://remote/my.xcframework.zip)
+     * @param checksum Checksum of the xcframework
+     */
+    fun remoteBinary(name: String, url: URI, checksum: String? = null)
 
     /**
      * Configures a remote package dependency.
