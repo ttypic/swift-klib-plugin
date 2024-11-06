@@ -95,8 +95,8 @@ internal fun createPackageSwiftContents(
                     it.isIgnoreExitValue = true
                 }
             }
-        }.run {
-            if ((this?.exitValue ?: 0) != 0) {
+        }?.run {
+            if (exitValue != 0) {
                 throw RuntimeException("Failed to add Swift Package target $cinteropName")
             }
         }
@@ -112,7 +112,7 @@ internal fun createPackageSwiftContents(
             add("--path")
             add(cinteropName)
             dependencies.forEach { dependency ->
-                if (dependency is SwiftPackageDependency.LocalBinary || dependency is SwiftPackageDependency.RemoteBinary) {
+                if (dependency.isBinaryDependency) {
                     add("--dependencies")
                     add(dependency.packageName ?: dependency.name.first())
                 }
@@ -136,7 +136,11 @@ internal fun createPackageSwiftContents(
                     it.args = listOf(
                         "-i",
                         "''",
-                        "/dependencies: \\[/,/]/ s/]/    \\n\\t.package(path: \"${escapedPath}\"),\\n]/",
+                        """
+                       /dependencies: \[/a\
+\        .package(path: \"${escapedPath}\"),
+
+                        """,
                         "Package.swift"
                     )
                     it.isIgnoreExitValue = true
@@ -155,8 +159,8 @@ internal fun createPackageSwiftContents(
             else -> {
                 null
             }
-        }.run {
-            if ((this?.exitValue ?: 0) != 0) {
+        }?.run {
+            if (exitValue != 0) {
                 throw RuntimeException(
                     "Failed to add Swift Package dependency $dependency",
                 )
@@ -200,7 +204,7 @@ internal fun createPackageSwiftContents(
             add("--targets")
             add(cinteropName)
             dependencies.forEach { dependency ->
-                if (dependency is SwiftPackageDependency.LocalBinary || dependency is SwiftPackageDependency.RemoteBinary) {
+                if (dependency.isBinaryDependency) {
                     add("--targets")
                     add(dependency.packageName ?: dependency.name.first())
                 }
@@ -258,7 +262,7 @@ private fun addMissingBlock(
         val updated =
             replace(
                 "name: \"$name\"\n",
-                "name: \"$name\",\n\tplatforms: [${platformContent}],\n\tproducts: [],\n\tdependencies: [],\n\ttargets: []\n"
+                "name: \"$name\",\n\tplatforms: [${platformContent}],\n\tproducts: [\n],\n\tdependencies: [\n],\n\ttargets: [\n]\n"
             )
         File(swiftBuildDir, "Package.swift").writeText(updated)
     }
@@ -277,3 +281,6 @@ private fun buildPlatformContent(
         ".watchOS(\"$minWatchos\")".takeIf { minWatchos.isNotEmpty() },
     ).joinToString(",")
 }
+
+private val SwiftPackageDependency.isBinaryDependency: Boolean
+    get() = (this is SwiftPackageDependency.LocalBinary) || (this is SwiftPackageDependency.RemoteBinary)

@@ -395,6 +395,11 @@ class SwiftPackageModulesTest {
 
     @Test
     fun `build with complex and mix spm repo`() {
+        val xcframeworkDirectory = File("src/functionalTest/resources/DummyFramework.xcframework")
+        assertTrue(
+            xcframeworkDirectory.exists(),
+            "Dummy XCFramework not found, see localbinary folder"
+        )
         // Given
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
@@ -405,6 +410,8 @@ class SwiftPackageModulesTest {
                 import FirebaseRemoteConfig
                 import KeychainAccess
                 import SwiftyJSON
+                import DummyFramework
+                import SwiftProtobuf
 
                 @objc public class FirebaseData: NSObject {
                      @objc public func testLinking() {
@@ -440,6 +447,7 @@ class SwiftPackageModulesTest {
                         github("SwiftyJSON", "SwiftyJSON")
                         versionRange("5.0.0", "6.0.0", true)
                     }
+                    localBinary("DummyFramework", xcframeworkDirectory)
                 }
             }
             .build()
