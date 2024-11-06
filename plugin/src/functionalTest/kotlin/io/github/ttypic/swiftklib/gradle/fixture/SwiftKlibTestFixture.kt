@@ -140,6 +140,9 @@ abstract class SwiftKlibTestFixture private constructor(
             if (entry._minWatchos.hasValue()) {
                 appendLine("        minWatchos = \"${entry.minWatchos}\"")
             }
+            if (!entry._toolsVersions.isNullOrEmpty()) {
+                appendLine("        toolsVersion = \"${entry.toolsVersion}\"")
+            }
 
             if (entry.dependencies.isNotEmpty()) {
                 appendLine("        dependencies {")
@@ -194,12 +197,15 @@ private class TestSwiftKlibEntryImpl : SwiftKlibEntry {
     val _minMacos = notNull<String>()
     val _minTvos = notNull<String>()
     val _minWatchos = notNull<String>()
+    val _toolsVersions: String?
+        get() = toolsVersion
 
     override var path: File by _path
     override var minIos: String by _minIos
     override var minMacos: String by _minMacos
     override var minTvos: String by _minTvos
     override var minWatchos: String by _minWatchos
+    override var toolsVersion: String? = null
 
     val dependencies = mutableListOf<TestDependencyConfig>()
 

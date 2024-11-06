@@ -430,6 +430,56 @@ class SwiftPackageModulesTest {
         assertPackageResolved(fixture, "firebase-ios-sdk")
     }
 
+    @Test
+    fun `build with valid toolsVersion`() {
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                import Foundation
+            """.trimIndent())
+            )
+            .withConfiguration {
+                toolsVersion = "5.5"
+                dependencies {
+                }
+            }
+            .build()
+
+        // When
+        val result = build(fixture.gradleProject.rootDir, "build")
+
+        // Then
+        assertThat(result).task(":library:build").succeeded()
+        getManifestContent(fixture) { manifest ->
+            assertTrue(manifest.contains("swift-tools-version: 5.5"))
+        }
+    }
+
+    @Test
+    fun `build with invalid toolsVersion`() {
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(content = """
+                import Foundation
+            """.trimIndent())
+            )
+            .withConfiguration {
+                toolsVersion = "5.3"
+                dependencies {
+                }
+            }
+            .build()
+
+        // When
+        val result = buildAndFail(fixture.gradleProject.rootDir, "build")
+
+        // Then
+        assertThat(result).output().contains("package manifest version 5.3.0 is too old")
+        getManifestContent(fixture) { manifest ->
+            assertTrue(manifest.contains("swift-tools-version:5.3"))
+        }
+    }
+
     private fun assertPackageResolved(fixture: SwiftKlibTestFixture, vararg packageNames: String) {
         val resolvedFile = File(
             fixture.gradleProject.rootDir,
@@ -437,12 +487,31 @@ class SwiftPackageModulesTest {
         )
         assertTrue(resolvedFile.exists(), "Package.resolved file not found")
 
-        val content = resolvedFile.readText()
-        packageNames.forEach { packageName ->
-            assertTrue(
-                content.contains("\"identity\" : \"$packageName\"", ignoreCase = true),
-                "$packageName dependency not found"
-            )
+        getPackageResolvedContent(fixture) { content ->
+            packageNames.forEach { packageName ->
+                assertTrue(
+                    content.contains("\"identity\" : \"$packageName\"", ignoreCase = true),
+                    "$packageName dependency not found"
+                )
+            }
         }
+    }
+
+    private fun getManifestContent(fixture: SwiftKlibTestFixture, content: (String) -> Unit) {
+        val resolvedFile = File(
+            fixture.gradleProject.rootDir,
+            "library/build/swiftklib/test/iosArm64/swiftBuild/Package.swift"
+        )
+        assertTrue(resolvedFile.exists(), "Package.swift file not found")
+        content(resolvedFile.readText())
+    }
+
+    private fun getPackageResolvedContent(fixture: SwiftKlibTestFixture, content: (String) -> Unit) {
+        val resolvedFile = File(
+            fixture.gradleProject.rootDir,
+            "library/build/swiftklib/test/iosArm64/swiftBuild/Package.resolved"
+        )
+        assertTrue(resolvedFile.exists(), "Package.resolved file not found")
+        content(resolvedFile.readText())
     }
 }
