@@ -567,7 +567,7 @@ class SwiftPackageModulesTest {
                     remoteBinary(
                         "DummyFramework",
                         URI("https://raw.githubusercontent.com/frankois944/swift-klib-plugin/refs/heads/swift-spm-local-remote-lib/plugin/src/functionalTest/resources/DummyFramework.xcframework.zip"),
-                        "08474480f84bb46e103896443151e80dce49fc68212125d41821adc23b184adc"
+                        "20f6264c95e80b6e2da7d2c9b9abe44b4426dac799927ea49fb7a4982f1affdb"
                     )
                 }
             }

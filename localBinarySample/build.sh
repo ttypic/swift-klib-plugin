@@ -1,6 +1,7 @@
 #!/bin/sh
 
 rm -rf ../plugin/src/functionalTest/resources/DummyFramework.xcframework
+rm -rf ../plugin/src/functionalTest/resources/DummyFramework.xcframework.zip
 
 xcodebuild archive \
 -scheme DummyFramework \
@@ -60,10 +61,15 @@ xcodebuild -create-xcframework \
     -archive archives/DummyFramework-watchOS_Simulator.xcarchive -framework DummyFramework.framework \
     -archive archives/DummyFramework-tvOS.xcarchive -framework DummyFramework.framework \
     -archive archives/DummyFramework-tvOS_Simulator.xcarchive -framework DummyFramework.framework \
-    -output ../plugin/src/functionalTest/resources/DummyFramework.xcframework
+    -output DummyFramework.xcframework
 
 
-cd ../plugin/src/functionalTest/resources/DummyFramework.xcframework
 zip -r DummyFramework.xcframework.zip DummyFramework.xcframework
-echo "Set the checksum of the package in the binary target for test"
+echo "Use the checksum to update the correct test"
 swift package compute-checksum DummyFramework.xcframework.zip
+
+mv DummyFramework.xcframework.zip ../plugin/src/functionalTest/resources/DummyFramework.xcframework.zip
+mv DummyFramework.xcframework ../plugin/src/functionalTest/resources/DummyFramework.xcframework
+
+
+
