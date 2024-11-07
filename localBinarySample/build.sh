@@ -64,6 +64,6 @@ xcodebuild -create-xcframework \
 
 
 cd ../plugin/src/functionalTest/resources/DummyFramework.xcframework
-zip DummyFramework.xcframework.zip DummyFramework.xcframework
+zip -r DummyFramework.xcframework.zip DummyFramework.xcframework
 echo "Set the checksum of the package in the binary target for test"
 swift package compute-checksum DummyFramework.xcframework.zip

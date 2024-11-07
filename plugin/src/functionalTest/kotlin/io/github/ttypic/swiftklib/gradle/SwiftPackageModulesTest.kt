@@ -552,10 +552,11 @@ class SwiftPackageModulesTest {
             .withSwiftSources(
                 SwiftSource.of(
                     content = """
-                import SwiftProtobuf
+                import DummyFramework
 
                 @objc public class DummyCode: NSObject {
                     @objc public func testLinking() {
+                        MyDummyFramework().printSomeValue()
                    }
                 }
             """.trimIndent()
@@ -564,9 +565,9 @@ class SwiftPackageModulesTest {
             .withConfiguration {
                 dependencies {
                     remoteBinary(
-                        "SwiftProtobuf",
-                        URI("https://github.com/hewigovens/wallet-core-spm/releases/download/0.0.1/SwiftProtobuf.xcframework.zip"),
-                        "270a6545f72a512aafc7d7ecb73621005248d4ea44f7ebbc06a2f33c7d15bc4c"
+                        "DummyFramework",
+                        URI("https://raw.githubusercontent.com/frankois944/swift-klib-plugin/refs/heads/swift-spm-local-remote-lib/plugin/src/functionalTest/resources/DummyFramework.xcframework.zip"),
+                        "08474480f84bb46e103896443151e80dce49fc68212125d41821adc23b184adc"
                     )
                 }
             }
