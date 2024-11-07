@@ -1,6 +1,6 @@
 ---
 triple:          'armv7k-apple-darwin'
-binary-path:     '/Users/francoisdabonot/Library/Developer/Xcode/DerivedData/DummyFramework-aqjyogrdgzcjkuagvbgvrztnxych/Build/Intermediates.noindex/ArchiveIntermediates/DummyFramework/InstallationBuildProductsLocation/Library/Frameworks/DummyFramework.framework/DummyFramework'
+binary-path:     '/Users/francoisdabonot/Library/Developer/Xcode/DerivedData/DummyFramework-heaxwzymygtjzrergcvdefjbkwaw/Build/Intermediates.noindex/ArchiveIntermediates/DummyFramework/InstallationBuildProductsLocation/Library/Frameworks/DummyFramework.framework/DummyFramework'
 relocations:
   - { offset: 0x31459, size: 0x4, addend: 0x0, symName: _DummyFrameworkVersionString, symObjAddr: 0x0, symBinAddr: 0x7D20, symSize: 0x0 }
   - { offset: 0x31489, size: 0x4, addend: 0x0, symName: _DummyFrameworkVersionNumber, symObjAddr: 0x38, symBinAddr: 0x7D58, symSize: 0x0 }

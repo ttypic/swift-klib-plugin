@@ -30,7 +30,7 @@
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		/BtJ04mquKepqQHBLWj6YhHVIBc=
+		5H78IK3P20vxtP6GaZUu9Us27Vw=
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		e2I9Pl9zw7ggQN5/Q8V7snYFSKE=
+		dKD8PgNtlrSVw5c13MgL7h32P3s=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -98,7 +98,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			HvvcCwgeV5YuHdUh6lLUPD8eS4f+BhcleZ/VDllNxNU=
+			GVyYJV6hwpmBxMrzTzietcOVccAKVkHDPiDH1NV4giI=
 			</data>
 		</dict>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -133,7 +133,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			H4FCNb+JZkzVZFsxUbsevRNKT1U9aNURWK6WYNIyCCs=
+			T8oj8WnKnlBRTJfggLgOZ/D5mPKN7/0p1hsISmwoM1o=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

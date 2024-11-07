@@ -30,7 +30,7 @@
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/arm64-apple-tvos-simulator.swiftmodule</key>
 		<data>
-		xvuK5L+hK+i2d3W5jIeyDCRON6k=
+		Jhj0L0UPRCsuPfoclS9fcnVEn3g=
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-tvos-simulator.abi.json</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-tvos-simulator.swiftmodule</key>
 		<data>
-		gDLsRkWwk+W8YaoJuzTyyhUY3Q8=
+		iAo/8feUPyFRLTYG9ui6vgnXI5c=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -98,7 +98,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			T3LZ6/Kn8zZBOkvQsFlO9Y7F8ozg9LnBAFUu4J7LsQ0=
+			3bPHQH47C2ht2J3wAI5G56+cG45Di0kPUVBdC4ofepc=
 			</data>
 		</dict>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-tvos-simulator.abi.json</key>
@@ -133,7 +133,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			By0yrqLtJtXgq6jfxBqj6A1LNNnCvM0vDB/IfmKwmVE=
+			6UXle4e8MGNW5clyL++JPAtlroG3Ja89BNGiGCDLGQM=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

@@ -30,7 +30,7 @@
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/arm64-apple-watchos-simulator.swiftmodule</key>
 		<data>
-		bmeVsZLcr8WxwjsFny6tSmVh1o0=
+		D3pL9VUWkkefNrXn9Rh0Si4RnTE=
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-watchos-simulator.abi.json</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-watchos-simulator.swiftmodule</key>
 		<data>
-		FwZVm8ZMObtNwcnbTe7QmyXIp3w=
+		ky7aWyRK9YhODkzePmtnaNpmKYU=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -98,7 +98,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			duUppUCPAVE7RVz/EayT7x+VvbTOcnueRoWeMBs3XMM=
+			HQaHzLbjDETGnfi0h7qotW0BXogPjT3XSMvhJTorsUw=
 			</data>
 		</dict>
 		<key>Modules/DummyFramework.swiftmodule/x86_64-apple-watchos-simulator.abi.json</key>
@@ -133,7 +133,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			1aOoveVf/MOKwfwyqWjtlK4PzN/VwSQJZPpld1rQEE0=
+			m5d7OMMkrx+J06umHJETasPU4i/7muw42zGrn4cn13A=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
