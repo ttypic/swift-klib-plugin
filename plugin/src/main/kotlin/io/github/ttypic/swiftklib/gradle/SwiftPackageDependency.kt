@@ -41,11 +41,12 @@ internal sealed interface SwiftPackageDependency : Serializable {
     data class RemoteBinary(
         @Input override val name: List<String>,
         @Input val url: URI,
-        @Input @Optional val checksum: String?,
+        @Input @Optional val checksum: String,
         @Input @Optional override val packageName: String? = null
     ) : SwiftPackageDependency {
         init {
             require(name.isNotEmpty() && name.indexOfFirst { it.isBlank() } == -1) { "Package name cannot be blank" }
+            require(checksum.isNotEmpty()) { "Checksum name cannot be blank" }
         }
     }
 

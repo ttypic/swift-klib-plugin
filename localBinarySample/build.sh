@@ -61,3 +61,9 @@ xcodebuild -create-xcframework \
     -archive archives/DummyFramework-tvOS.xcarchive -framework DummyFramework.framework \
     -archive archives/DummyFramework-tvOS_Simulator.xcarchive -framework DummyFramework.framework \
     -output ../plugin/src/functionalTest/resources/DummyFramework.xcframework
+
+
+cd ../plugin/src/functionalTest/resources/DummyFramework.xcframework
+zip DummyFramework.xcframework.zip DummyFramework.xcframework
+echo "Set the checksum of the package in the binary target for test"
+swift package compute-checksum DummyFramework.xcframework.zip

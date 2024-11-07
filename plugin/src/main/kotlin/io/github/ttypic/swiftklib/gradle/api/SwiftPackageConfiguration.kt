@@ -25,7 +25,7 @@ interface SwiftPackageConfiguration {
      * @param url Remote url to the xcframework (ex: https://remote/my.xcframework.zip)
      * @param checksum Checksum of the xcframework
      */
-    fun remoteBinary(name: String, url: URI, checksum: String? = null)
+    fun remoteBinary(name: String, url: URI, checksum: String)
 
     /**
      * Configures a remote package dependency.

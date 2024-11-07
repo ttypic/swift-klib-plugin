@@ -33,7 +33,7 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
         _dependencies.set(currentDeps)
     }
 
-    override fun remoteBinary(name: String, url: URI, checksum: String?) {
+    override fun remoteBinary(name: String, url: URI, checksum: String) {
         val currentDeps = _dependencies.get().toMutableList()
         currentDeps.add(SwiftPackageDependency.RemoteBinary(listOf(name), url, checksum))
         _dependencies.set(currentDeps)

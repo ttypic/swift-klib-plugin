@@ -234,7 +234,7 @@ private class TestSwiftPackageConfigurationImpl : SwiftPackageConfiguration {
         dependencies.add(TestDependencyConfig.LocalBinary(name, path))
     }
 
-    override fun remoteBinary(name: String, url: URI, checksum: String?) {
+    override fun remoteBinary(name: String, url: URI, checksum: String) {
         dependencies.add(TestDependencyConfig.RemoteBinary(name, url, checksum))
     }
 
@@ -303,7 +303,7 @@ private sealed interface TestDependencyConfig {
         override fun toConfigString() = """localBinary("$name", File("${path.absolutePath}"))"""
     }
 
-    data class RemoteBinary(val name: String, val url: URI, val checksum: String?) : TestDependencyConfig {
+    data class RemoteBinary(val name: String, val url: URI, val checksum: String) : TestDependencyConfig {
         override fun toConfigString() = """remoteBinary("$name", uri("$url"), "$checksum")"""
     }
 

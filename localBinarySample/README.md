@@ -1,5 +1,5 @@
-Build a dummy framework for testing local binary implementation
+Build a dummy xcframework for testing local binary import.
 
-It should be available in the repository.
+The xcframework should already be available in the repository and used by the tests.
 
-If you need to update the dummy, update the code and run `./build.sh` and the framework will be generated : ../plugin/src/functionalTest/resources/DummyFramework.xcframework
+If you need to update the dummy, update the code and run `./build.sh` and the framework will be generated in this folder : ../plugin/src/functionalTest/resources/DummyFramework.xcframework
