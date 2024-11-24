@@ -134,7 +134,7 @@ abstract class CompileSwiftTask @Inject constructor(
         if (printDebug) {
             logger.warn("========   Package.swift contents   ========")
             logger.warn(File(swiftBuildDir, "Package.swift").readText())
-            logger.warn("=addPlatformBlock======= | Package.swift contents | ========")
+            logger.warn("======== | Package.swift contents | ========")
         }
     }
 
