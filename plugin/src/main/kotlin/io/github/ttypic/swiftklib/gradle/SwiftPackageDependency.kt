@@ -18,7 +18,7 @@ internal sealed interface SwiftPackageDependency : Serializable {
         @Input @get:Optional override val packageName: String? = null,
     ) : SwiftPackageDependency {
         init {
-            require(name.isNotEmpty() && !name.contains("")) { "Package name cannot be blank" }
+            require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
             require(path.exists()) { "Package path must exist: $path" }
         }
     }
@@ -34,7 +34,7 @@ internal sealed interface SwiftPackageDependency : Serializable {
             @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
-                require(name.isNotEmpty() && !name.contains("")) { "Package name cannot be blank" }
+                require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
                 require(url.isNotBlank()) { "URL cannot be blank" }
                 require(version.isNotBlank()) { "Version cannot be blank" }
             }
@@ -49,7 +49,7 @@ internal sealed interface SwiftPackageDependency : Serializable {
             @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
-                require(name.isNotEmpty() && !name.contains("")) { "Package name cannot be blank" }
+                require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
                 require(url.isNotBlank()) { "URL cannot be blank" }
                 require(from.isNotBlank()) { "From version cannot be blank" }
                 require(to.isNotBlank()) { "To version cannot be blank" }
@@ -63,7 +63,7 @@ internal sealed interface SwiftPackageDependency : Serializable {
             @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
-                require(name.isNotEmpty() && !name.contains("")) { "Package name cannot be blank" }
+                require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
                 require(url.isNotBlank()) { "URL cannot be blank" }
                 require(branchName.isNotBlank()) { "Branch name cannot be blank" }
             }
@@ -76,7 +76,7 @@ internal sealed interface SwiftPackageDependency : Serializable {
             @Input @get:Optional override val packageName: String? = null
         ) : Remote {
             init {
-                require(name.isNotEmpty() && !name.contains("")) { "Package name cannot be blank" }
+                require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
                 require(url.isNotBlank()) { "URL cannot be blank" }
                 require(version.isNotBlank()) { "Version cannot be blank" }
             }
