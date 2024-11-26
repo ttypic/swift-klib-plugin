@@ -9,7 +9,7 @@ interface SwiftKlibEntry {
     var minMacos: String
     var minTvos: String
     var minWatchos: String
-    var toolsVersion: String?
+    var toolsVersion: String
 
     fun packageName(name: String)
 

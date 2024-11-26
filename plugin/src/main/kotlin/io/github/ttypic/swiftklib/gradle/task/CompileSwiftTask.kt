@@ -34,7 +34,7 @@ abstract class CompileSwiftTask @Inject constructor(
     @Optional @Input val minMacosProperty: Property<String>,
     @Optional @Input val minTvosProperty: Property<String>,
     @Optional @Input val minWatchosProperty: Property<String>,
-    @Optional @Input val toolsVersionProperty: Property<String?>,
+    @Optional @Input val toolsVersionProperty: Property<String>,
 ) : DefaultTask() {
 
     @get:Optional
@@ -86,7 +86,7 @@ abstract class CompileSwiftTask @Inject constructor(
     private val minMacos get() = minMacosProperty.getOrElse("10.13")
     private val minTvos get() = minTvosProperty.getOrElse("12.0")
     private val minWatchos get() = minWatchosProperty.getOrElse("4.0")
-    private val toolsVersion get() = toolsVersionProperty.getOrElse("")
+    private val toolsVersion get() = toolsVersionProperty.getOrElse("5.6")
 
     /**
      * Creates build directory or cleans up if it already exists
@@ -120,20 +120,19 @@ abstract class CompileSwiftTask @Inject constructor(
     }
 
     private fun createPackageSwift(dependencies: List<SwiftPackageDependency>) {
-        createPackageSwiftContents(
+        val manifest = createPackageSwiftContents(
             cinteropName,
             dependencies,
-            execOperations,
-            swiftBuildDir,
             minIos,
             minMacos,
             minTvos,
             minWatchos,
             toolsVersion
         )
+        File(swiftBuildDir, "Package.swift").writeText(manifest)
         if (printDebug) {
             logger.warn("========   Package.swift contents   ========")
-            logger.warn(File(swiftBuildDir, "Package.swift").readText())
+            logger.warn(manifest)
             logger.warn("======== | Package.swift contents | ========")
         }
     }
