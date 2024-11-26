@@ -464,7 +464,7 @@ class SwiftPackageModulesTest {
             """.trimIndent())
             )
             .withConfiguration {
-                toolsVersion = "5.3"
+                toolsVersion = "100.0"
                 dependencies {
                 }
             }
@@ -474,9 +474,9 @@ class SwiftPackageModulesTest {
         val result = buildAndFail(fixture.gradleProject.rootDir, "build")
 
         // Then
-        assertThat(result).output().contains("package manifest version 5.3.0 is too old")
+        assertThat(result).output().contains("is using Swift tools version 100.0.0")
         getManifestContent(fixture) { manifest ->
-            assertTrue(manifest.contains("swift-tools-version:5.3"))
+            assertTrue(manifest.contains("swift-tools-version: 100.0"), "must contains version 100.0")
         }
     }
 
