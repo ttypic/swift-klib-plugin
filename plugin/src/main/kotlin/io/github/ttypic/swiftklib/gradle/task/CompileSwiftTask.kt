@@ -86,7 +86,7 @@ abstract class CompileSwiftTask @Inject constructor(
     private val minMacos get() = minMacosProperty.getOrElse("10.13")
     private val minTvos get() = minTvosProperty.getOrElse("12.0")
     private val minWatchos get() = minWatchosProperty.getOrElse("4.0")
-    private val toolsVersion get() = toolsVersionProperty.getOrElse("5.6")
+    private val toolsVersion get() = toolsVersionProperty.getOrElse("5.9")
 
     /**
      * Creates build directory or cleans up if it already exists
