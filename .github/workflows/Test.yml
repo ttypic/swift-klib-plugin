@@ -1,4 +1,4 @@
-name: Release
+name: Test
 
 on:
     push:
@@ -30,4 +30,4 @@ jobs:
                   check-latest: true
 
             - name: Run tests
-              run: ./gradlew test
+              run: ./gradlew test functionalTest
