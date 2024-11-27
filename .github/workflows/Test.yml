@@ -11,9 +11,14 @@ on:
 permissions:
     contents: write
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     test:
         strategy:
+            fail-fast: false
             matrix:
                 os: [macos-latest, ubuntu-latest]
         runs-on: ${{ matrix.os }}
