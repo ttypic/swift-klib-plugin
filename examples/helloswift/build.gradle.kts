@@ -37,7 +37,7 @@ swiftklib {
     create("HelloSwift") {
         path = file("native/HelloSwift")
         packageName("com.ttypic.objclibs.greeting")
-        
+
         dependencies {
             remote("KeychainAccess") {
                 github("kishikawakatsumi", "KeychainAccess")
