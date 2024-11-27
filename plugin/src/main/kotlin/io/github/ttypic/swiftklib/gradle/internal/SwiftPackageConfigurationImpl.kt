@@ -10,18 +10,23 @@ import javax.inject.Inject
 internal class SwiftPackageConfigurationImpl @Inject constructor(
     private val objects: ObjectFactory
 ) : SwiftPackageConfiguration {
-    private val _dependencies =
+    internal val dependencies =
         objects
             .listProperty(SwiftPackageDependency::class.java)
             .convention(emptyList())
 
-    internal val dependencies get() = _dependencies
 
     @ExperimentalSwiftklibApi
     override fun local(name: String, path: java.io.File) {
-        val currentDeps = _dependencies.get().toMutableList()
-        currentDeps.add(SwiftPackageDependency.Local(listOf(name), path))
-        _dependencies.set(currentDeps)
+        dependencies.add(SwiftPackageDependency.Local(listOf(name), path))
+    }
+
+    @ExperimentalSwiftklibApi
+    override fun remote(
+        name: String,
+        configuration: RemotePackageConfiguration.() -> Unit
+    ) {
+        remote(listOf(name), configuration)
     }
 
     @ExperimentalSwiftklibApi
@@ -33,26 +38,9 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
         builder.apply(configuration)
 
         val dependency = builder.build()
-            ?: throw IllegalStateException("No version specification provided for remote package $names")
+            ?: throw IllegalStateException("No version specification provided for remote package ${names.joinToString(", ")}")
 
-        val currentDeps = _dependencies.get().toMutableList()
-        currentDeps.add(dependency)
-        _dependencies.set(currentDeps)
+        dependencies.add(dependency)
     }
 
-    @ExperimentalSwiftklibApi
-    override fun remote(
-        name: String,
-        configuration: RemotePackageConfiguration.() -> Unit
-    ) {
-        val builder = RemotePackageConfigurationImpl(objects, listOf(name))
-        builder.apply(configuration)
-
-        val dependency = builder.build()
-            ?: throw IllegalStateException("No version specification provided for remote package $name")
-
-        val currentDeps = _dependencies.get().toMutableList()
-        currentDeps.add(dependency)
-        _dependencies.set(currentDeps)
-    }
 }
