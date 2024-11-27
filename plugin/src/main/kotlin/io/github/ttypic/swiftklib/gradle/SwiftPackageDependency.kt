@@ -31,7 +31,7 @@ internal sealed interface SwiftPackageDependency : Serializable {
         @Input @Optional override val packageName: String? = null
     ) : SwiftPackageDependency {
         init {
-            require(name.isNotEmpty() && name.indexOfFirst { it.isBlank() } == -1) { "Package name cannot be blank" }
+            require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
             require(path.exists()) { "Local Binary path must exist: $path" }
         }
     }
@@ -43,7 +43,7 @@ internal sealed interface SwiftPackageDependency : Serializable {
         @Input @Optional override val packageName: String? = null
     ) : SwiftPackageDependency {
         init {
-            require(name.isNotEmpty() && name.indexOfFirst { it.isBlank() } == -1) { "Package name cannot be blank" }
+            require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
             require(checksum.isNotEmpty()) { "Checksum name cannot be blank" }
         }
     }
