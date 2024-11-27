@@ -127,7 +127,8 @@ abstract class CompileSwiftTask @Inject constructor(
             minMacos,
             minTvos,
             minWatchos,
-            toolsVersion
+            toolsVersion,
+            swiftBuildDir
         )
         File(swiftBuildDir, "Package.swift").writeText(manifest)
         if (printDebug) {

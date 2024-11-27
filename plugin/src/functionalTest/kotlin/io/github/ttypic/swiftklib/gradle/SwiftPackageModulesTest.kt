@@ -8,6 +8,7 @@ import io.github.ttypic.swiftklib.gradle.fixture.SwiftSource
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.net.URI
 
 class SwiftPackageModulesTest {
 
@@ -375,6 +376,11 @@ class SwiftPackageModulesTest {
 
     @Test
     fun `build with complex and mix spm repo`() {
+        val xcframeworkDirectory = File("src/functionalTest/resources/DummyFramework.xcframework")
+        assertTrue(
+            xcframeworkDirectory.exists(),
+            "Dummy XCFramework not found, see localbinary folder"
+        )
         // Given
         val fixture = SwiftKlibTestFixture.builder()
             .withSwiftSources(
@@ -384,6 +390,7 @@ class SwiftPackageModulesTest {
                 import FirebaseRemoteConfig
                 import KeychainAccess
                 import SwiftyJSON
+                import DummyFramework
 
                 @objc public class FirebaseData: NSObject {
                      @objc public func testLinking() {
@@ -418,6 +425,7 @@ class SwiftPackageModulesTest {
                         github("SwiftyJSON", "SwiftyJSON")
                         versionRange("5.0.0", "6.0.0", true)
                     }
+                    localBinary("DummyFramework", xcframeworkDirectory)
                 }
             }
             .build()
@@ -479,6 +487,71 @@ class SwiftPackageModulesTest {
             assertTrue(manifest.contains("swift-tools-version: 100.0"), "must contains version 100.0")
         }
     }
+
+    @Test
+    fun `build with local binary xcframework`() {
+        val xcframeworkDirectory = File("src/functionalTest/resources/DummyFramework.xcframework")
+        assertTrue(
+            xcframeworkDirectory.exists(),
+            "Dummy XCFramework not found, see localbinary folder"
+        )
+
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(
+                    content = """
+                import DummyFramework
+
+                @objc public class DummyCode: NSObject {
+                    @objc public func testLinking() {
+                        MyDummyFramework().printSomeValue()
+                   }
+                }
+            """.trimIndent()
+                )
+            )
+            .withConfiguration {
+                dependencies {
+                    localBinary("DummyFramework", xcframeworkDirectory)
+                }
+            }
+            .build()
+
+        // When
+        build(fixture.gradleProject.rootDir, "build")
+    }
+
+    @Test
+    fun `build with remote binary xcframework`() {
+        val fixture = SwiftKlibTestFixture.builder()
+            .withSwiftSources(
+                SwiftSource.of(
+                    content = """
+                import DummyFramework
+
+                @objc public class DummyCode: NSObject {
+                    @objc public func testLinking() {
+                        MyDummyFramework().printSomeValue()
+                   }
+                }
+            """.trimIndent()
+                )
+            )
+            .withConfiguration {
+                dependencies {
+                    remoteBinary(
+                        "DummyFramework",
+                        URI("https://raw.githubusercontent.com/frankois944/swift-klib-plugin/refs/heads/swift-spm-local-remote-lib/plugin/src/functionalTest/resources/DummyFramework.xcframework.zip"),
+                        "20f6264c95e80b6e2da7d2c9b9abe44b4426dac799927ea49fb7a4982f1affdb"
+                    )
+                }
+            }
+            .build()
+
+        // When
+        build(fixture.gradleProject.rootDir, "build")
+    }
+
 
     private fun assertPackageResolved(fixture: SwiftKlibTestFixture, vararg packageNames: String) {
         val resolvedFile = File(

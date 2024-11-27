@@ -5,6 +5,8 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import java.io.File
 import java.io.Serializable
+import java.net.URI
+import java.net.URL
 
 internal sealed interface SwiftPackageDependency : Serializable {
     @get:Input
@@ -20,6 +22,29 @@ internal sealed interface SwiftPackageDependency : Serializable {
         init {
             require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
             require(path.exists()) { "Package path must exist: $path" }
+        }
+    }
+
+    data class LocalBinary(
+        @Input override val name: List<String>,
+        @InputDirectory val path: File,
+        @Input @Optional override val packageName: String? = null
+    ) : SwiftPackageDependency {
+        init {
+            require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
+            require(path.exists()) { "Local Binary path must exist: $path" }
+        }
+    }
+
+    data class RemoteBinary(
+        @Input override val name: List<String>,
+        @Input val url: URI,
+        @Input @Optional val checksum: String,
+        @Input @Optional override val packageName: String? = null
+    ) : SwiftPackageDependency {
+        init {
+            require(name.isNotEmpty() && name.none { it.isBlank() }) { "Package name cannot be blank" }
+            require(checksum.isNotEmpty()) { "Checksum name cannot be blank" }
         }
     }
 
