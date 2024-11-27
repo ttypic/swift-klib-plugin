@@ -1,27 +1,36 @@
 package io.github.ttypic.swiftklib.gradle
 
+import io.github.ttypic.swiftklib.gradle.api.SwiftKlibEntry
 import io.github.ttypic.swiftklib.gradle.task.CompileSwiftTask
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.reflect.TypeOf
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 import org.jetbrains.kotlin.konan.target.HostManager
+import kotlin.reflect.javaType
+import kotlin.reflect.typeOf
 
 const val EXTENSION_NAME = "swiftklib"
 
+@OptIn(ExperimentalStdlibApi::class)
 @Suppress("unused")
 class SwiftKlibPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         val objects: ObjectFactory = project.objects
 
-        val swiftKlibEntries: NamedDomainObjectContainer<SwiftKlibEntry> =
-            objects.domainObjectContainer(SwiftKlibEntry::class.java) { name ->
-                objects.newInstance(SwiftKlibEntry::class.java, name)
+        val swiftKlibEntries: NamedDomainObjectContainer<out SwiftKlibEntryImpl> =
+            objects.domainObjectContainer(SwiftKlibEntryImpl::class.java) { name ->
+                objects.newInstance(SwiftKlibEntryImpl::class.java, name)
             }
 
-        project.extensions.add(EXTENSION_NAME, swiftKlibEntries)
+        val type = TypeOf.typeOf<NamedDomainObjectContainer<out SwiftKlibEntry>>(
+            typeOf<NamedDomainObjectContainer<SwiftKlibEntry>>().javaType
+        )
+
+        project.extensions.add(type, EXTENSION_NAME, swiftKlibEntries)
 
         if (!HostManager.hostIsMac) {
             logger.warn("Current host OS is not macOS. Disabling SwiftKlib plugin")
@@ -40,16 +49,20 @@ class SwiftKlibPlugin : Plugin<Project> {
                 tasks.register(
                     taskName,
                     CompileSwiftTask::class.java,
+                    project.hasProperty("swiftklibDebug"),
                     name,
                     target,
                     buildDir,
-                    entry.path,
-                    entry.packageName,
-                    entry.minIos,
-                    entry.minMacos,
-                    entry.minTvos,
-                    entry.minWatchos,
-                )
+                    entry._path,
+                    entry._packageName,
+                    entry._minIos,
+                    entry._minMacos,
+                    entry._minTvos,
+                    entry._minWatchos,
+                    entry._toolsVersion
+                ).configure {
+                    it.dependenciesProperty = entry.dependencyHandler.dependencies
+                }
             }
         }
 

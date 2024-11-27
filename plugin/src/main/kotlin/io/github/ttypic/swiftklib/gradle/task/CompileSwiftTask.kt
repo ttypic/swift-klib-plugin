@@ -2,13 +2,16 @@ package io.github.ttypic.swiftklib.gradle.task
 
 import io.github.ttypic.swiftklib.gradle.CompileTarget
 import io.github.ttypic.swiftklib.gradle.EXTENSION_NAME
+import io.github.ttypic.swiftklib.gradle.SwiftPackageDependency
 import io.github.ttypic.swiftklib.gradle.templates.createPackageSwiftContents
 import io.github.ttypic.swiftklib.gradle.util.StringReplacingOutputStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
@@ -21,16 +24,22 @@ import java.security.MessageDigest
 import javax.inject.Inject
 
 abstract class CompileSwiftTask @Inject constructor(
+    @Input val printDebug: Boolean,
     @Input val cinteropName: String,
     @Input val compileTarget: CompileTarget,
     @Input val buildDirectory: String,
     @InputDirectory val pathProperty: Property<File>,
     @Input val packageNameProperty: Property<String>,
-    @Optional @Input val minIosProperty: Property<Int>,
-    @Optional @Input val minMacosProperty: Property<Int>,
-    @Optional @Input val minTvosProperty: Property<Int>,
-    @Optional @Input val minWatchosProperty: Property<Int>,
+    @Optional @Input val minIosProperty: Property<String>,
+    @Optional @Input val minMacosProperty: Property<String>,
+    @Optional @Input val minTvosProperty: Property<String>,
+    @Optional @Input val minWatchosProperty: Property<String>,
+    @Optional @Input val toolsVersionProperty: Property<String>,
 ) : DefaultTask() {
+
+    @get:Optional
+    @get:Nested
+    internal abstract var dependenciesProperty: ListProperty<SwiftPackageDependency>
 
     @get:Internal
     internal val targetDir: File
@@ -52,9 +61,16 @@ abstract class CompileSwiftTask @Inject constructor(
     @TaskAction
     fun produce() {
         val packageName: String = packageNameProperty.get()
+        val dependencies = dependenciesProperty.getOrElse(emptyList())
 
         prepareBuildDirectory()
-        createPackageSwift()
+        createPackageSwift(dependencies)
+
+        // Only resolve if we have dependencies
+        if (dependencies.isNotEmpty()) {
+            resolveSwiftPackages()
+        }
+
         val xcodeMajorVersion = readXcodeMajorVersion()
         val (libPath, headerPath) = buildSwift(xcodeMajorVersion)
 
@@ -66,10 +82,11 @@ abstract class CompileSwiftTask @Inject constructor(
         )
     }
 
-    private val minIos get() = minIosProperty.getOrElse(13)
-    private val minMacos get() = minMacosProperty.getOrElse(11)
-    private val minTvos get() = minTvosProperty.getOrElse(13)
-    private val minWatchos get() = minWatchosProperty.getOrElse(8)
+    private val minIos get() = minIosProperty.getOrElse("12.0")
+    private val minMacos get() = minMacosProperty.getOrElse("10.13")
+    private val minTvos get() = minTvosProperty.getOrElse("12.0")
+    private val minWatchos get() = minWatchosProperty.getOrElse("4.0")
+    private val toolsVersion get() = toolsVersionProperty.getOrElse("5.9")
 
     /**
      * Creates build directory or cleans up if it already exists
@@ -87,12 +104,37 @@ abstract class CompileSwiftTask @Inject constructor(
     private fun buildDir() =
         File(swiftBuildDir, cinteropName)
 
-    /**
-     * Creates `Package.Swift` file for the library
-     */
-    private fun createPackageSwift() {
-        File(swiftBuildDir, "Package.swift")
-            .writeText(createPackageSwiftContents(cinteropName))
+    private fun resolveSwiftPackages() {
+        logger.info("Resolving Swift Package dependencies...")
+
+        val result = execOperations.exec {
+            it.executable = "xcrun"
+            it.workingDir = swiftBuildDir
+            it.args = listOf("swift", "package", "resolve")
+            it.isIgnoreExitValue = true
+        }
+
+        if (result.exitValue != 0) {
+            throw RuntimeException("Failed to resolve Swift Package dependencies")
+        }
+    }
+
+    private fun createPackageSwift(dependencies: List<SwiftPackageDependency>) {
+        val manifest = createPackageSwiftContents(
+            cinteropName,
+            dependencies,
+            minIos,
+            minMacos,
+            minTvos,
+            minWatchos,
+            toolsVersion
+        )
+        File(swiftBuildDir, "Package.swift").writeText(manifest)
+        if (printDebug) {
+            logger.warn("========   Package.swift contents   ========")
+            logger.warn(manifest)
+            logger.warn("======== | Package.swift contents | ========")
+        }
     }
 
     private fun buildSwift(xcodeVersion: Int): SwiftBuildResult {
@@ -124,7 +166,11 @@ abstract class CompileSwiftTask @Inject constructor(
             )
         }
 
-        val releaseBuildPath = File(swiftBuildDir, ".build/${compileTarget.arch()}-apple-macosx/release")
+        val releaseBuildPath =
+            File(
+                swiftBuildDir,
+                ".build/${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${compileTarget.simulatorSuffix()}/release"
+            )
 
         return SwiftBuildResult(
             libPath = File(releaseBuildPath, "lib${cinteropName}.a"),
@@ -134,16 +180,16 @@ abstract class CompileSwiftTask @Inject constructor(
 
     private fun generateBuildArgs(): List<String> {
         val sdkPath = readSdkPath()
-        val baseArgs = "swift build --arch ${compileTarget.arch()} -c release".split(" ")
-
-        val xcrunArgs = listOf(
-            "-sdk",
-            sdkPath,
-            "-target",
-            compileTarget.asSwiftcTarget(compileTarget.operatingSystem()),
-        ).asSwiftcArgs()
-
-        return baseArgs + xcrunArgs
+        return listOf(
+            "swift",
+            "build",
+            "-c",
+            "release",
+            "--triple",
+            "${compileTarget.arch()}-apple-${compileTarget.operatingSystem()}${minOs(compileTarget)}${compileTarget.simulatorSuffix()}",
+            "--sdk",
+            sdkPath
+        )
     }
 
     /** Workaround for bug in toolchain where the sdk path (via `swiftc -sdk` flag) is not propagated to clang. */
@@ -153,7 +199,6 @@ abstract class CompileSwiftTask @Inject constructor(
             readSdkPath(),
         ).asCcArgs()
 
-    private fun List<String>.asSwiftcArgs() = asBuildToolArgs("swiftc")
     private fun List<String>.asCcArgs() = asBuildToolArgs("cc")
 
     private fun List<String>.asBuildToolArgs(tool: String): List<String> {
@@ -212,7 +257,12 @@ abstract class CompileSwiftTask @Inject constructor(
      * Note: adds lib-file md5 hash to library in order to automatically
      * invalidate connected cinterop task
      */
-    private fun createDefFile(libPath: File, headerPath: File, packageName: String, xcodeVersion: Int) {
+    private fun createDefFile(
+        libPath: File,
+        headerPath: File,
+        packageName: String,
+        xcodeVersion: Int
+    ) {
         val xcodePath = readXcodePath()
 
         val linkerPlatformVersion =
@@ -224,8 +274,8 @@ abstract class CompileSwiftTask @Inject constructor(
         val basicLinkerOpts = listOf(
             "-L/usr/lib/swift",
             "-$linkerPlatformVersion",
-            "${minOs(compileTarget)}.0",
-            "${minOs(compileTarget)}.0",
+            minOs(compileTarget),
+            minOs(compileTarget),
             "-L${xcodePath}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${compileTarget.os()}"
         )
 
@@ -254,13 +304,13 @@ abstract class CompileSwiftTask @Inject constructor(
 
     private fun CompileTarget.operatingSystem(): String =
         when (this) {
-            CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> "ios$minIos"
-            CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> "watchos$minWatchos"
-            CompileTarget.tvosX64, CompileTarget.tvosArm64, CompileTarget.tvosSimulatorArm64 -> "tvos$minTvos"
-            CompileTarget.macosX64, CompileTarget.macosArm64 -> "macosx$minMacos"
+            CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> "ios"
+            CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> "watchos"
+            CompileTarget.tvosX64, CompileTarget.tvosArm64, CompileTarget.tvosSimulatorArm64 -> "tvos"
+            CompileTarget.macosX64, CompileTarget.macosArm64 -> "macosx"
         }
 
-    private fun minOs(compileTarget: CompileTarget): Int =
+    private fun minOs(compileTarget: CompileTarget): String? =
         when (compileTarget) {
             CompileTarget.iosX64, CompileTarget.iosArm64, CompileTarget.iosSimulatorArm64 -> minIos
             CompileTarget.watchosX64, CompileTarget.watchosArm64, CompileTarget.watchosSimulatorArm64 -> minWatchos
