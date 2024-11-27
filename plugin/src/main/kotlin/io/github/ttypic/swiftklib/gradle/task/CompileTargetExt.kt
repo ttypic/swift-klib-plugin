@@ -72,7 +72,3 @@ internal fun CompileTarget.linkerMinOsVersionName() = when(this) {
     CompileTarget.macosX64 -> "macosx_version_min"
     CompileTarget.macosArm64 -> "macosx_version_min"
 }
-
-internal fun CompileTarget.asSwiftcTarget(operatingSystem: String, osVersion: String): String {
-    return "${archPrefix()}-apple-${operatingSystem}$osVersion${simulatorSuffix()}"
-}

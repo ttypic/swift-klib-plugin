@@ -39,22 +39,6 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
 
     @ExperimentalSwiftklibApi
     override fun remote(
-        name: List<String>,
-        configuration: RemotePackageConfiguration.() -> Unit
-    ) {
-        val builder = RemotePackageConfigurationImpl(objects, name)
-        builder.apply(configuration)
-
-        val dependency = builder.build()
-            ?: throw IllegalStateException("No version specification provided for remote package ${name.joinToString(", ")}")
-
-        val currentDeps = dependencies.get().toMutableList()
-        currentDeps.add(dependency)
-        dependencies.set(currentDeps)
-    }
-
-    @ExperimentalSwiftklibApi
-    override fun remote(
         name: String,
         configuration: RemotePackageConfiguration.() -> Unit
     ) {
@@ -63,6 +47,22 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
 
         val dependency = builder.build()
             ?: throw IllegalStateException("No version specification provided for remote package $name")
+
+        val currentDeps = dependencies.get().toMutableList()
+        currentDeps.add(dependency)
+        dependencies.set(currentDeps)
+    }
+
+    @ExperimentalSwiftklibApi
+    override fun remote(
+        names: List<String>,
+        configuration: RemotePackageConfiguration.() -> Unit
+    ) {
+        val builder = RemotePackageConfigurationImpl(objects, names)
+        builder.apply(configuration)
+
+        val dependency = builder.build()
+            ?: throw IllegalStateException("No version specification provided for remote package ${names.joinToString(", ")}")
 
         val currentDeps = dependencies.get().toMutableList()
         currentDeps.add(dependency)

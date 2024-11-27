@@ -39,6 +39,6 @@ interface SwiftPackageConfiguration {
      * @param names a list of product's name to add
      * @param configuration Configuration block for the remote package
      */
-    fun remote(name: List<String>, configuration: RemotePackageConfiguration.() -> Unit)
+    fun remote(names: List<String>, configuration: RemotePackageConfiguration.() -> Unit)
 }
 
