@@ -13,46 +13,44 @@ import javax.inject.Inject
 internal class SwiftPackageConfigurationImpl @Inject constructor(
     private val objects: ObjectFactory
 ) : SwiftPackageConfiguration {
-    private val _dependencies =
+    internal val dependencies =
         objects
             .listProperty(SwiftPackageDependency::class.java)
             .convention(emptyList())
 
-    internal val dependencies get() = _dependencies
-
     @ExperimentalSwiftklibApi
     override fun local(name: String, path: File) {
-        val currentDeps = _dependencies.get().toMutableList()
+        val currentDeps = dependencies.get().toMutableList()
         currentDeps.add(SwiftPackageDependency.Local(listOf(name), path))
-        _dependencies.set(currentDeps)
+        dependencies.set(currentDeps)
     }
 
     override fun localBinary(name: String, path: File) {
-        val currentDeps = _dependencies.get().toMutableList()
+        val currentDeps = dependencies.get().toMutableList()
         currentDeps.add(SwiftPackageDependency.LocalBinary(listOf(name), path))
-        _dependencies.set(currentDeps)
+        dependencies.set(currentDeps)
     }
 
     override fun remoteBinary(name: String, url: URI, checksum: String) {
-        val currentDeps = _dependencies.get().toMutableList()
+        val currentDeps = dependencies.get().toMutableList()
         currentDeps.add(SwiftPackageDependency.RemoteBinary(listOf(name), url, checksum))
-        _dependencies.set(currentDeps)
+        dependencies.set(currentDeps)
     }
 
     @ExperimentalSwiftklibApi
     override fun remote(
-        names: List<String>,
+        name: List<String>,
         configuration: RemotePackageConfiguration.() -> Unit
     ) {
-        val builder = RemotePackageConfigurationImpl(objects, names)
+        val builder = RemotePackageConfigurationImpl(objects, name)
         builder.apply(configuration)
 
         val dependency = builder.build()
-            ?: throw IllegalStateException("No version specification provided for remote package $names")
+            ?: throw IllegalStateException("No version specification provided for remote package ${name.joinToString(", ")}")
 
-        val currentDeps = _dependencies.get().toMutableList()
+        val currentDeps = dependencies.get().toMutableList()
         currentDeps.add(dependency)
-        _dependencies.set(currentDeps)
+        dependencies.set(currentDeps)
     }
 
     @ExperimentalSwiftklibApi
@@ -66,8 +64,8 @@ internal class SwiftPackageConfigurationImpl @Inject constructor(
         val dependency = builder.build()
             ?: throw IllegalStateException("No version specification provided for remote package $name")
 
-        val currentDeps = _dependencies.get().toMutableList()
+        val currentDeps = dependencies.get().toMutableList()
         currentDeps.add(dependency)
-        _dependencies.set(currentDeps)
+        dependencies.set(currentDeps)
     }
 }

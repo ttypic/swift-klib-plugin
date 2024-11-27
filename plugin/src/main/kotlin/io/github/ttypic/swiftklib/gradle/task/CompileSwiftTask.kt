@@ -34,7 +34,7 @@ abstract class CompileSwiftTask @Inject constructor(
     @Optional @Input val minMacosProperty: Property<String>,
     @Optional @Input val minTvosProperty: Property<String>,
     @Optional @Input val minWatchosProperty: Property<String>,
-    @Optional @Input val toolsVersionProperty: Property<String>
+    @Optional @Input val toolsVersionProperty: Property<String>,
 ) : DefaultTask() {
 
     @get:Optional
