@@ -9,6 +9,7 @@ enum class CompileTarget {
     iosSimulatorArm64,
     watchosX64,
     watchosArm64,
+    watchosDeviceArm64,
     watchosSimulatorArm64,
     tvosX64,
     tvosArm64,
@@ -28,6 +29,7 @@ enum class CompileTarget {
                 KonanTarget.IOS_SIMULATOR_ARM64.name -> iosSimulatorArm64
                 KonanTarget.WATCHOS_X64.name -> watchosX64
                 KonanTarget.WATCHOS_ARM64.name -> watchosArm64
+                KonanTarget.WATCHOS_DEVICE_ARM64.name -> watchosDeviceArm64
                 KonanTarget.WATCHOS_SIMULATOR_ARM64.name -> watchosSimulatorArm64
                 KonanTarget.TVOS_X64.name -> tvosX64
                 KonanTarget.TVOS_ARM64.name -> tvosArm64
